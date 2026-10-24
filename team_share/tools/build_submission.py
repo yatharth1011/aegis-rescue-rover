@@ -264,6 +264,9 @@ def update_form(sim):
         "Budget Compliance": ("Budget Compliance: ",
                               "Itemised Bill of Materials: Rs 11,183 of the Rs 15,000 limit (18 of 19 items linked to Robu.in)."),
     }
+    # the form is edited in place, so match the labels written by earlier runs too
+    for key, (label, _) in list(new.items()):
+        new[label.rstrip(": ")] = new[key]
     for p in d.paragraphs:
         if len(p.runs) >= 2:
             for key, (label, body) in new.items():
@@ -277,8 +280,45 @@ def update_form(sim):
             if "Autonomous Edge-Guided Identification & Salvage Rover" in r.text:
                 r.text = r.text.replace("A.E.G.I.S. — Autonomous Edge-Guided Identification & Salvage Rover",
                                         "A.E.G.I.S.: Autonomous Search-and-Rescue Rover")
+    fit_one_page(d)
     d.save(f)
     return f
+
+
+def fit_one_page(d):
+    """Tighten margins, spacing and table padding so the whole form fits on one page."""
+    from docx.shared import Cm, Pt
+    from docx.oxml.ns import qn
+    for s in d.sections:
+        s.top_margin = s.bottom_margin = Cm(1.3)
+        s.left_margin = s.right_margin = Cm(1.6)
+    body = d.element.body
+    for p in list(d.paragraphs):                       # blank spacer paragraphs
+        if not p.text.strip() and not p._p.xpath(".//w:drawing") and p._p.getnext() is not None \
+                and p._p.getnext().tag != qn("w:sectPr"):
+            body.remove(p._p)
+    for p in d.paragraphs:
+        pf = p.paragraph_format
+        pf.line_spacing = 1.0
+        pf.space_after = Pt(2)
+        if pf.space_before and pf.space_before > Pt(6):
+            pf.space_before = Pt(6)
+    for t in d.tables:
+        for tc in t._tbl.iter(qn("w:tcMar")):
+            for side in tc:
+                side.set(qn("w:w"), "40" if side.tag in (qn("w:top"), qn("w:bottom")) else side.get(qn("w:w")))
+        for row in t.rows:
+            for cell in row.cells:
+                for p in cell.paragraphs:
+                    p.paragraph_format.space_before = p.paragraph_format.space_after = Pt(0)
+                    p.paragraph_format.line_spacing = 1.0
+    from docx.enum.table import WD_ROW_HEIGHT_RULE, WD_CELL_VERTICAL_ALIGNMENT
+    for t, h in ((d.tables[0], Cm(0.85)), (d.tables[1], Cm(1.9))):   # room to sign
+        for row in t.rows[1:] if t is d.tables[0] else t.rows:
+            row.height, row.height_rule = h, WD_ROW_HEIGHT_RULE.AT_LEAST
+            if t is d.tables[0]:
+                for cell in row.cells:
+                    cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
 
 if __name__ == "__main__":
