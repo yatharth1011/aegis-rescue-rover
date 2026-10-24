@@ -13,6 +13,7 @@ Inputs (all optional; the deck shows a clear placeholder if one is missing):
 import json
 import os
 
+from docx.oxml.ns import qn
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
@@ -234,91 +235,62 @@ def build_deck(sim):
     return path
 
 
-def update_form(sim):
+TEAM = [("Yatharth Shrivastava", ""), ("Prabhnoor Singh", ""), ("Shreyansh", ""),
+        ("Souvik Das", ""), ("Utkarsh Kumar Gautam", ""), ("Shubham Maurya", "")]
+TITLE = "A.E.G.I.S.: Autonomous Search-and-Rescue Rover"
+
+
+def update_form(sim=None):
+    """The course approval form, laid out exactly like the issued template (one page, no extra fields)."""
     from docx import Document
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches, Pt
     f = os.path.join(OUT, "ApprovalForm_AEGIS_Thursday_1.docx")
-    d = Document(f)
-    sim_txt = ("In a 3D simulation of %d random table layouts per case (camera, sound, Wi-Fi loss included), the rover "
-               "rescued the hidden token in %d%% of runs and homed in on the scream in %d%%."
-               % (sim["n_per_demo"], sim["demo1_success_pct"], sim["demo2_success_pct"])) if sim else \
-        "Simulation results to be added."
-    new = {
-        "Search & Rescue Paradigm": ("Search & Rescue Prototype: ",
-                                     "A small autonomous rover that hears a distress call, searches a table-top arena, recognises a victim token, "
-                                     "takes it into its intake bay and returns by the shortest path it has already driven. A low-cost prototype of the "
-                                     "search-and-rescue loop, not a field robot."),
-        "Acoustic Localization": ("Acoustic Localization: ",
-                                  "Two INMP441 microphones at 48 kHz; GCC-PHAT gives the bearing on the robot, and readings taken at different "
-                                  "headings resolve the front/back ambiguity. A scream detector runs on the laptop."),
-        "Navigation Policy": ("Edge Brain and Validation: ",
-                              "The laptop runs the YOLO victim detector, mapping, coverage search and path planning over Wi-Fi. " + sim_txt),
-        "Deterministic Safety": ("On-board Safety: ",
-                                 "A control-barrier-function speed limit from three VL53L0X laser sensors, IR table-edge sensors, stall escape and a "
-                                 "stop-on-link-loss watchdog run on the ESP32-S3 itself."),
-        "Mechanical CAD": ("Mechanical CAD: ",
-                           "Parametric Mk2 assembly in Autodesk Fusion: raised 4WD chassis, intake bay with a servo-driven door, camera mast, "
-                           "laser-cut acrylic decks and 3D-printed PLA+ parts, with joints and limits."),
-        "Shortest Path": ("Return Path: ",
-                          "Wheel encoders and an MPU-6050 gyro give odometry; A* plans the shortest route home over cells the rover has "
-                          "already seen free."),
-        "Budget Compliance": ("Budget Compliance: ",
-                              "Itemised Bill of Materials: Rs 11,183 of the Rs 15,000 limit (18 of 19 items linked to Robu.in)."),
-    }
-    # the form is edited in place, so match the labels written by earlier runs too
-    for key, (label, _) in list(new.items()):
-        new[label.rstrip(": ")] = new[key]
-    for p in d.paragraphs:
-        if len(p.runs) >= 2:
-            for key, (label, body) in new.items():
-                if p.runs[0].text.startswith(key) or p.text.startswith(key):
-                    p.runs[0].text = label
-                    p.runs[1].text = body
-                    for r in p.runs[2:]:
-                        r.text = ""
-    for p in d.paragraphs:
-        for r in p.runs:
-            if "Autonomous Edge-Guided Identification & Salvage Rover" in r.text:
-                r.text = r.text.replace("A.E.G.I.S. — Autonomous Edge-Guided Identification & Salvage Rover",
-                                        "A.E.G.I.S.: Autonomous Search-and-Rescue Rover")
-    fit_one_page(d)
+    d = Document()
+    s = d.sections[0]
+    s.page_width, s.page_height = Inches(8.5), Inches(11)
+    s.left_margin = s.right_margin = s.top_margin = s.bottom_margin = Inches(1)
+    normal = d.styles["Normal"]
+    normal.font.name, normal.font.size = "Arial", Pt(11)
+    normal.element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
+    normal.paragraph_format.space_after = Pt(0)
+    normal.paragraph_format.line_spacing = 1.15
+
+    def heading(text, align, before):
+        p = d.add_paragraph()
+        p.alignment = align
+        p.paragraph_format.space_before, p.paragraph_format.space_after = Pt(before), Pt(6)
+        r = p.add_run(text)
+        r.bold = r.underline = True
+        return p
+
+    heading("AY 2026-27, Semester I", WD_ALIGN_PARAGRAPH.LEFT, 0)
+    heading("TL101 Project Approval", WD_ALIGN_PARAGRAPH.CENTER, 6)
+    p = d.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p.paragraph_format.space_after = Pt(6)
+    p.add_run("The Team “AEGIS” has proposed to work on project titled “%s”. The team is made up of "
+              "students from lab session taking place every week on Thursday from 2 pm to 4 pm. The team members of "
+              "this group are as mentioned in table below and the team leader “________________”." % TITLE)
+    heading("Team members", WD_ALIGN_PARAGRAPH.CENTER, 6)
+
+    t = d.add_table(rows=1 + len(TEAM), cols=4)
+    t.style = "Table Grid"
+    t.alignment = WD_TABLE_ALIGNMENT.CENTER
+    rows = [("S.No.", "Student Name", "Roll No.", "Branch")] + \
+           [(str(i + 1), n, r, "AI & Data Engineering") for i, (n, r) in enumerate(TEAM)]
+    widths = [Inches(w) for w in (0.8, 2.2, 1.6, 1.9)]           # template's columns, widened so nothing wraps
+    t.autofit = False
+    for gc, w in zip(t._tbl.tblGrid.findall(qn("w:gridCol")), widths):
+        gc.set(qn("w:w"), str(int(w.inches * 1440)))
+    for row, vals in zip(t.rows, rows):
+        for cell, v, w in zip(row.cells, vals, widths):
+            cell.width = w
+            cell.paragraphs[0].paragraph_format.line_spacing = 1.0
+            cell.paragraphs[0].add_run(v)
     d.save(f)
     return f
-
-
-def fit_one_page(d):
-    """Tighten margins, spacing and table padding so the whole form fits on one page."""
-    from docx.shared import Cm, Pt
-    from docx.oxml.ns import qn
-    for s in d.sections:
-        s.top_margin = s.bottom_margin = Cm(1.3)
-        s.left_margin = s.right_margin = Cm(1.6)
-    body = d.element.body
-    for p in list(d.paragraphs):                       # blank spacer paragraphs
-        if not p.text.strip() and not p._p.xpath(".//w:drawing") and p._p.getnext() is not None \
-                and p._p.getnext().tag != qn("w:sectPr"):
-            body.remove(p._p)
-    for p in d.paragraphs:
-        pf = p.paragraph_format
-        pf.line_spacing = 1.0
-        pf.space_after = Pt(2)
-        if pf.space_before and pf.space_before > Pt(6):
-            pf.space_before = Pt(6)
-    for t in d.tables:
-        for tc in t._tbl.iter(qn("w:tcMar")):
-            for side in tc:
-                side.set(qn("w:w"), "40" if side.tag in (qn("w:top"), qn("w:bottom")) else side.get(qn("w:w")))
-        for row in t.rows:
-            for cell in row.cells:
-                for p in cell.paragraphs:
-                    p.paragraph_format.space_before = p.paragraph_format.space_after = Pt(0)
-                    p.paragraph_format.line_spacing = 1.0
-    from docx.enum.table import WD_ROW_HEIGHT_RULE, WD_CELL_VERTICAL_ALIGNMENT
-    for t, h in ((d.tables[0], Cm(0.85)), (d.tables[1], Cm(1.9))):   # room to sign
-        for row in t.rows[1:] if t is d.tables[0] else t.rows:
-            row.height, row.height_rule = h, WD_ROW_HEIGHT_RULE.AT_LEAST
-            if t is d.tables[0]:
-                for cell in row.cells:
-                    cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
 
 if __name__ == "__main__":
