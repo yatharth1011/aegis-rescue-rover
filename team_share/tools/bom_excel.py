@@ -205,6 +205,6 @@ ws.column_dimensions['E'].width = 18
 ws.column_dimensions['F'].width = 46
 ws.column_dimensions['G'].width = 42
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "to_submit", "ItemList_GroupName_LabSessionDay_LabSessionSequence.xlsx")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "to_submit", "ItemList_AEGIS_Thursday_1.xlsx")
 wb.save(OUT)
 print("Saved", os.path.abspath(OUT))

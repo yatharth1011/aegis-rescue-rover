@@ -1,8 +1,8 @@
 """
 Rebuilds the two submission documents from the current design and results:
 
-  to_submit/ProjectIdeaTemplate.pptx   (2 slides, course template structure)
-  to_submit/FormToGet...Approval...docx (technical bullets refreshed)
+  to_submit/ProjectIdea_AEGIS_Thursday_1.pptx   (2 slides, course template structure)
+  to_submit/ApprovalForm_AEGIS_Thursday_1.docx (technical bullets refreshed)
 
 Inputs (all optional; the deck shows a clear placeholder if one is missing):
   team_share/Build_AEGIS_Rover/output/render_iso_door_open.png   Fusion render
@@ -228,14 +228,14 @@ def build_deck(sim):
                      ex1=example("final_demo1", "3005"), ex2=example("final_demo2", "4036"))
         add_story(prs, paths, sim)
 
-    path = os.path.join(OUT, "ProjectIdeaTemplate.pptx")
+    path = os.path.join(OUT, "ProjectIdea_AEGIS_Thursday_1.pptx")
     prs.save(path)
     return path
 
 
 def update_form(sim):
     from docx import Document
-    f = os.path.join(OUT, "FormToGetPhysicallyOrDigitallySignedFromFacultyInstructorAsApprovalOfTeamProject.docx")
+    f = os.path.join(OUT, "ApprovalForm_AEGIS_Thursday_1.docx")
     d = Document(f)
     sim_txt = ("In a 3D simulation of %d random table layouts per case (camera, sound, Wi-Fi loss included), the rover "
                "rescued the hidden token in %d%% of runs and homed in on the scream in %d%%."
