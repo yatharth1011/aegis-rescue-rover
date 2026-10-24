@@ -1,0 +1,13 @@
+# regenerable build output
+team_share/firmware/aegis_s3/build/
+team_share/firmware/aegis_s3/sdkconfig
+team_share/firmware/aegis_s3/sdkconfig.old
+team_share/firmware/aegis_s3/managed_components/
+team_share/firmware/aegis_s3/test/host/test_core
+team_share/firmware/aegis_s3/sim/sim
+team_share/simulation3d/build/
+# Python / OS clutter
+__pycache__/
+*.pyc
+.DS_Store
+~$*

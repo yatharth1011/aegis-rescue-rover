@@ -1,0 +1,11 @@
+{
+  "occurrences": 41,
+  "parameters": 34,
+  "mass_g_rover": 1608.6,
+  "bbox_mm": [
+    394.0,
+    140.0,
+    147.7
+  ],
+  "unexpected_clashes": []
+}

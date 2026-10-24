@@ -1,0 +1,298 @@
+[
+ {
+  "kind": "step",
+  "value": 0.002,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.907,
+  "low_parts_dragging_s": 0.0,
+  "status": "crossed"
+ },
+ {
+  "kind": "step",
+  "value": 0.004,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.877,
+  "low_parts_dragging_s": 0.3,
+  "status": "crossed"
+ },
+ {
+  "kind": "step",
+  "value": 0.006,
+  "stall_kgcm": 7.0,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.8,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.008,
+  "stall_kgcm": 7.0,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.6,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.01,
+  "stall_kgcm": 7.0,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.8,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.015,
+  "stall_kgcm": 7.0,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.5,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.02,
+  "stall_kgcm": 7.0,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.5,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "slope",
+  "value": 5,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.441,
+  "low_parts_dragging_s": 3.3,
+  "status": "crossed"
+ },
+ {
+  "kind": "slope",
+  "value": 10,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.427,
+  "low_parts_dragging_s": 0.9,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 15,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.404,
+  "low_parts_dragging_s": 0.5,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 20,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.373,
+  "low_parts_dragging_s": 0.9,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 25,
+  "stall_kgcm": 7.0,
+  "progress_m": 1.334,
+  "low_parts_dragging_s": 1.5,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 30,
+  "stall_kgcm": 7.0,
+  "progress_m": 0.767,
+  "low_parts_dragging_s": 6.8,
+  "status": "crossed"
+ },
+ {
+  "kind": "rough",
+  "value": 0.003,
+  "stall_kgcm": 7.0,
+  "crossed_of_3": 3,
+  "statuses": [
+   "crossed",
+   "crossed",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "rough",
+  "value": 0.006,
+  "stall_kgcm": 7.0,
+  "crossed_of_3": 3,
+  "statuses": [
+   "crossed",
+   "crossed",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "rough",
+  "value": 0.01,
+  "stall_kgcm": 7.0,
+  "crossed_of_3": 3,
+  "statuses": [
+   "crossed",
+   "crossed",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "rough",
+  "value": 0.02,
+  "stall_kgcm": 7.0,
+  "crossed_of_3": 2,
+  "statuses": [
+   "crossed",
+   "high-centred / snagged",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "step",
+  "value": 0.002,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.907,
+  "low_parts_dragging_s": 0.0,
+  "status": "crossed"
+ },
+ {
+  "kind": "step",
+  "value": 0.004,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.877,
+  "low_parts_dragging_s": 0.3,
+  "status": "crossed"
+ },
+ {
+  "kind": "step",
+  "value": 0.006,
+  "stall_kgcm": 2.8,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.8,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.008,
+  "stall_kgcm": 2.8,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.6,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.01,
+  "stall_kgcm": 2.8,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.8,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.015,
+  "stall_kgcm": 2.8,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.5,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "step",
+  "value": 0.02,
+  "stall_kgcm": 2.8,
+  "progress_m": -0.281,
+  "low_parts_dragging_s": 14.5,
+  "status": "high-centred / snagged"
+ },
+ {
+  "kind": "slope",
+  "value": 5,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.441,
+  "low_parts_dragging_s": 3.3,
+  "status": "crossed"
+ },
+ {
+  "kind": "slope",
+  "value": 10,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.428,
+  "low_parts_dragging_s": 0.9,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 15,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.404,
+  "low_parts_dragging_s": 0.5,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 20,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.373,
+  "low_parts_dragging_s": 0.9,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 25,
+  "stall_kgcm": 2.8,
+  "progress_m": 1.335,
+  "low_parts_dragging_s": 1.5,
+  "status": "tipped"
+ },
+ {
+  "kind": "slope",
+  "value": 30,
+  "stall_kgcm": 2.8,
+  "progress_m": 0.777,
+  "low_parts_dragging_s": 7.3,
+  "status": "crossed"
+ },
+ {
+  "kind": "rough",
+  "value": 0.003,
+  "stall_kgcm": 2.8,
+  "crossed_of_3": 3,
+  "statuses": [
+   "crossed",
+   "crossed",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "rough",
+  "value": 0.006,
+  "stall_kgcm": 2.8,
+  "crossed_of_3": 3,
+  "statuses": [
+   "crossed",
+   "crossed",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "rough",
+  "value": 0.01,
+  "stall_kgcm": 2.8,
+  "crossed_of_3": 3,
+  "statuses": [
+   "crossed",
+   "crossed",
+   "crossed"
+  ]
+ },
+ {
+  "kind": "rough",
+  "value": 0.02,
+  "stall_kgcm": 2.8,
+  "crossed_of_3": 2,
+  "statuses": [
+   "crossed",
+   "high-centred / snagged",
+   "crossed"
+  ]
+ }
+]

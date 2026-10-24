@@ -1,0 +1,10 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"script",
+	"author":	"Yatharth Shrivastava",
+	"description":	{
+		"":	"Parametric 3D Model Generator for Project A.E.G.I.S. Rover in TL101 Tinkering Lab"
+	},
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
