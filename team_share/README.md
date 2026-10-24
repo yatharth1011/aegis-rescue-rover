@@ -35,7 +35,7 @@ Safety never depends on the link: the edge sensors, distance sensors and watchdo
 
 **Search strategy.** The rover always runs a camera coverage search: it keeps a map of which parts of the table it has seen and drives to the viewpoint that reveals the most unseen area per metre travelled. When it hears a scream, the bearing (accumulated over several headings to resolve front/back) biases that choice toward the sound. Only the camera confirms the victim.
 
-**Main hardware** (full list, prices and links in `../to_submit/ItemList_AEGIS_Thursday_1.xlsx`; total ₹11,183, reserve ₹3,817):
+**Main hardware** (full list, prices and links in `../to_submit/ItemList_AEGIS_Thursday_1.xlsx`; total ₹11,018, reserve ₹3,982):
 
 - ESP32-S3 DevKitC-1 and ESP32-CAM (OV2640)
 - 4 × N20 gear motors with encoders, 2 × TB6612FNG drivers
@@ -141,7 +141,7 @@ Acoustic homing doubles the success rate and more than halves the mission time.
 
 1. Re-run both Fusion scripts to include the rear-corner edge sensors and engraved decks.
 2. Fill in the advisor name on slide 1.
-3. Add an acrylic vendor link (item list line 16) and re-check stock on out-of-stock lines.
+3. Re-check stock on the three lines marked out of stock (ESP32-CAM, INMP441 microphones, 44 mm wheels). An in-stock INMP441 on a square board is listed on Robu.in at Rs 209; using it means updating the microphone footprint in the Fusion model.
 4. Submit `to_submit/`. Show `simulation3d/results/example_demo1.gif` and `example_demo2.gif`.
 
 **After approval**

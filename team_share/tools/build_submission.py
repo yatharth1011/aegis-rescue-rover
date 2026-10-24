@@ -138,7 +138,7 @@ def build_deck(sim):
             run = cell.text_frame.paragraphs[0].runs[0]
             run.font.size, run.font.color.rgb = Pt(14), INK
     text(s, Emu(457200), Emu(6200000), Emu(11277600), Emu(330000),
-         "Team of 6, School of AI & Data Engineering.  Budget: Rs 11,183 of Rs 15,000 (itemised list attached).  "
+         "Team of 6, School of AI & Data Engineering.  Budget: Rs 11,018 of Rs 15,000 (itemised list attached).  "
          "* Approval by e-mail or the signed form.", size=11, color=MUTED)
 
     # ---------------- slide 2: experiment setup -------------------------------------------
