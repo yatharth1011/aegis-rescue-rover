@@ -13,7 +13,7 @@ The rover **hears** a distress call, **searches** a table-top arena, **recognise
 **Status:**
 - Mk2 is designed in Autodesk Fusion (41 parts, zero clashes, with a wiring harness and engraved placement marks).
 - The ESP32-S3 firmware builds, and its core passes 32/32 unit tests.
-- In a 3D simulation (MuJoCo, a YOLO detector trained on the Mac GPU, room acoustics, lossy Wi-Fi), the full mission succeeds in **80%** of hidden-victim runs and **72%** of scream-homing runs.
+- In a 3D simulation (MuJoCo, a YOLO detector trained on the Mac GPU, room acoustics, lossy Wi-Fi), the full mission succeeds in **70%** of hidden-victim runs and **72%** of scream-homing runs, with 1 fall off the table in 120 missions.
 
 Reproduce the results with `team_share/simulation3d/README.md`, then rebuild the submission files:
 

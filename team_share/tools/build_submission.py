@@ -137,7 +137,7 @@ def build_deck(sim):
             run = cell.text_frame.paragraphs[0].runs[0]
             run.font.size, run.font.color.rgb = Pt(14), INK
     text(s, Emu(457200), Emu(6200000), Emu(11277600), Emu(330000),
-         "Team of 6, School of AI & Data Engineering.  Budget: Rs 11,085 of Rs 15,000 (itemised list attached).  "
+         "Team of 6, School of AI & Data Engineering.  Budget: Rs 11,183 of Rs 15,000 (itemised list attached).  "
          "* Approval by e-mail or the signed form.", size=11, color=MUTED)
 
     # ---------------- slide 2: experiment setup -------------------------------------------
@@ -225,7 +225,8 @@ def build_deck(sim):
                      render_wiring=os.path.join(A, "render_wiring_top.png"), wiring_guide=os.path.join(A, "wiring_guide_crop.png"),
                      gif1=os.path.join(A, "demo1_poster.gif"), gif2=os.path.join(A, "demo2_poster.gif"),
                      ai_sees=os.path.join(A, "ai_sees.png"), summary=os.path.join(R, "summary.png"),
-                     ex1=example("final_demo1", "3005"), ex2=example("final_demo2", "4036"))
+                     ex1=example("final_demo1", str(sim.get("example_seeds", {}).get("1", "3005"))),
+                     ex2=example("final_demo2", str(sim.get("example_seeds", {}).get("2", "4036"))))
         add_story(prs, paths, sim)
 
     path = os.path.join(OUT, "ProjectIdea_AEGIS_Thursday_1.pptx")
@@ -261,7 +262,7 @@ def update_form(sim):
                           "Wheel encoders and an MPU-6050 gyro give odometry; A* plans the shortest route home over cells the rover has "
                           "already seen free."),
         "Budget Compliance": ("Budget Compliance: ",
-                              "Itemised Bill of Materials: Rs 11,085 of the Rs 15,000 limit (18 of 19 items linked to Robu.in)."),
+                              "Itemised Bill of Materials: Rs 11,183 of the Rs 15,000 limit (18 of 19 items linked to Robu.in)."),
     }
     for p in d.paragraphs:
         if len(p.runs) >= 2:

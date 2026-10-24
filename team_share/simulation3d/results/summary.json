@@ -2,67 +2,71 @@
   "sets": {
     "final_demo1": {
       "n": 40,
-      "success_pct": 80.0,
-      "median_time_s": 37.6,
-      "found_pct": 92.5,
-      "captured_pct": 85.0,
-      "contact_free_pct": 37.5,
+      "success_pct": 70.0,
+      "median_time_s": 34.7,
+      "found_pct": 87.5,
+      "captured_pct": 77.5,
+      "contact_free_pct": 40.0,
       "fell_pct": 0.0,
-      "link_loss_pct": 5.4,
-      "watchdog_stops_mean": 83.3,
+      "link_loss_pct": 5.7,
+      "watchdog_stops_mean": 58.7,
       "outcomes": {
-        "success": 32,
-        "timeout": 8
+        "success": 28,
+        "timeout": 12
       }
     },
     "final_demo2": {
       "n": 40,
       "success_pct": 72.5,
-      "median_time_s": 34.6,
-      "found_pct": 92.5,
-      "captured_pct": 77.5,
-      "contact_free_pct": 45.0,
-      "fell_pct": 5.0,
-      "link_loss_pct": 5.7,
-      "watchdog_stops_mean": 53.8,
+      "median_time_s": 31.4,
+      "found_pct": 87.5,
+      "captured_pct": 75.0,
+      "contact_free_pct": 52.5,
+      "fell_pct": 0.0,
+      "link_loss_pct": 5.2,
+      "watchdog_stops_mean": 35.2,
       "outcomes": {
         "success": 29,
-        "fell": 2,
-        "timeout": 9
+        "timeout": 11
       }
     },
     "final_demo1_badlink": {
       "n": 20,
-      "success_pct": 65.0,
-      "median_time_s": 41.6,
-      "found_pct": 85.0,
-      "captured_pct": 70.0,
-      "contact_free_pct": 35.0,
-      "fell_pct": 0.0,
-      "link_loss_pct": 19.8,
-      "watchdog_stops_mean": 511.6,
-      "outcomes": {
-        "success": 13,
-        "timeout": 7
-      }
-    },
-    "final_demo2_badlink": {
-      "n": 20,
       "success_pct": 70.0,
-      "median_time_s": 36.8,
+      "median_time_s": 40.7,
       "found_pct": 95.0,
-      "captured_pct": 70.0,
-      "contact_free_pct": 25.0,
+      "captured_pct": 80.0,
+      "contact_free_pct": 45.0,
       "fell_pct": 0.0,
-      "link_loss_pct": 19.4,
-      "watchdog_stops_mean": 358.4,
+      "link_loss_pct": 18.3,
+      "watchdog_stops_mean": 526.4,
       "outcomes": {
         "success": 14,
         "timeout": 6
       }
+    },
+    "final_demo2_badlink": {
+      "n": 20,
+      "success_pct": 50.0,
+      "median_time_s": 39.9,
+      "found_pct": 95.0,
+      "captured_pct": 65.0,
+      "contact_free_pct": 20.0,
+      "fell_pct": 5.0,
+      "link_loss_pct": 20.6,
+      "watchdog_stops_mean": 686.2,
+      "outcomes": {
+        "success": 10,
+        "timeout": 9,
+        "fell": 1
+      }
     }
   },
   "n_per_demo": 40,
-  "demo1_success_pct": 80,
-  "demo2_success_pct": 72
+  "demo1_success_pct": 70,
+  "demo2_success_pct": 72,
+  "example_seeds": {
+    "1": 3009,
+    "2": 4036
+  }
 }

@@ -60,9 +60,10 @@ BOARDS = [  # name, w, h (mm), list of (side, [(pin, function, colour)])
                     ("VDD", "3V3", "3V3"), ("GND", "GND", "GND")])]),
     ("PCF8574T I/O expander", 40, 16, [
         ("left", [("GND", "GND", "GND"), ("VCC", "3V3", "3V3"), ("SDA", "I2C SDA", "SDA"), ("SCL", "I2C SCL", "SCL")]),
-        ("bottom", [("P0", "cliff FL", "IR"), ("P1", "cliff FR", "IR"), ("P2", "cliff rear", "IR"), ("P3", "bay capture", "IR")])]),
-    ("TCRT5000 / IR obstacle module (x4)", 32, 14, [
-        ("left", [("VCC", "3V3", "3V3"), ("GND", "GND", "GND"), ("DO", "PCF8574 P0-P3", "IR")])]),
+        ("bottom", [("P0", "cliff FL", "IR"), ("P1", "cliff FR", "IR"), ("P2", "cliff rear", "IR"), ("P3", "cliff RL", "IR"),
+                    ("P4", "cliff RR", "IR"), ("P5", "bay capture", "IR")])]),
+    ("TCRT5000 x5 / IR obstacle module x1", 32, 14, [
+        ("left", [("VCC", "3V3", "3V3"), ("GND", "GND", "GND"), ("DO", "PCF8574 P0-P5", "IR")])]),
     ("MG946R servo  |  N20 encoder motor (x4)", 40.7, 19.7, [
         ("left", [("brown", "GND", "GND"), ("red", "servo buck 5.0 V", "5V_servo"), ("orange", "GPIO 3", "5V_servo")]),
         ("right", [("red", "M+ to AO1/BO1", "MOTOR"), ("white", "M- to AO2/BO2", "GND"), ("black", "encoder VCC 3V3", "3V3"),
@@ -85,7 +86,7 @@ WIRES = [  # from, to, signal, colour key, gauge
     ("ESP32 GPIO 3", "MG946R orange", "50 Hz servo pulse", "5V_servo", "26 AWG"),
     ("ESP32-CAM U0T", "ESP32 GPIO 2", "UART 115200", "UART", "26 AWG"),
     ("Battery + via 100k / 22k divider", "ESP32 GPIO 1", "battery voltage", "VBAT", "26 AWG"),
-    ("IR modules DO", "PCF8574 P0-P3", "cliff / capture", "IR", "26 AWG"),
+    ("IR modules DO", "PCF8574 P0-P5", "5 cliff + bay capture", "IR", "26 AWG"),
 ]
 
 

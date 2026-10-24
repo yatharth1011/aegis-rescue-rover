@@ -49,6 +49,8 @@ class Robot:
         self.tof_t = -1.0
         self.backoff = 0.0
         self.fwd_off = 0.0
+        self.cliff_t = -9.0
+        self.cliff_front = False
         self.stalled = False
         self.esc = 0.0
         self.events = dict(cbf_ticks=0, cliff_reflex=0, watchdog_stops=0, stalls=0)
@@ -82,9 +84,15 @@ class Robot:
         if (cliff["FL"] or cliff["FR"]) and self.backoff <= 0 and self.fwd_off <= 0:
             self.backoff = 0.06
             self.events["cliff_reflex"] += 1
-        elif cliff["R"] and self.fwd_off <= 0 and self.backoff <= 0:
+        elif (cliff["R"] or cliff.get("RL") or cliff.get("RR")) and self.fwd_off <= 0 and self.backoff <= 0:
             self.fwd_off = 0.06
             self.events["cliff_reflex"] += 1
+        if any(cliff.values()):
+            self.cliff_t = t
+            self.cliff_front = cliff["FL"] or cliff["FR"]
+        if t - self.cliff_t < 1.0:                      # right after an edge: no turning, no move toward it
+            w = 0.0
+            v = min(v, 0.0) if self.cliff_front else max(v, 0.0)
         if self.backoff > 0:
             v, w = -0.08, 0.0
             self.backoff -= 0.08 * dt

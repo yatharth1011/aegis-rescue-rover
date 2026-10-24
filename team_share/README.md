@@ -203,16 +203,16 @@ Results:
 
 | Demo (random table layouts) | Missions completed: found, captured, home within 15 cm |
 |---|---|
-| 1. Hidden token, no sound (40) | **80%**, median 38 s |
-| 2. Scream homing (40) | **72%**, median 35 s |
-| 1. Bad Wi-Fi, about 20% packet loss (20) | 65% |
-| 2. Bad Wi-Fi (20) | 70% |
+| 1. Hidden token, no sound (40) | **70%**, median 35 s |
+| 2. Scream homing (40) | **72%**, median 31 s |
+| 1. Bad Wi-Fi, about 20% packet loss (20) | 70% |
+| 2. Bad Wi-Fi (20) | 50% |
 
 The token was found in 37 of 40 runs in both demos.
 
 **Known gaps:**
 
-- **2 of 40 scream runs fell off the table.** The edge reflex needs tuning, and the RL reward (`rl_reward.py`) now punishes falling, tipping and going upside down.
+- **Falls:** the first version fell off the table in 2 of 40 scream runs. Two rear-corner edge sensors, a 20 cm planner edge margin and a "no turning right after an edge" reflex brought it to **1 fall in 120 missions** (on the bad Wi-Fi link). The price was hidden-token success dropping from 80% to 70%: the rover is now more cautious near edges. The RL reward (`rl_reward.py`) punishes falling, tipping and going upside down.
 - **Light obstacle contacts are common.**
 - **Low decoys get nudged,** because the ToF sensors can't see objects that low.
 
@@ -228,7 +228,7 @@ Mk2 is a table and indoor robot; rugged terrain needs bigger wheels, suspension 
 
 - The Mac trains the RL policy and the detector, and runs the "edge brain" over Wi-Fi in the demo.
 - Safety stays on the ESP32.
-- A Pi only makes sense for a laptop-free field version. It would probably blow the ₹3,915 budget reserve (approximate) and the power budget.
+- A Pi only makes sense for a laptop-free field version. It would probably blow the ₹3,817 budget reserve (approximate) and the power budget.
 
 ## 📋 8. What is left to make the project complete
 
@@ -248,7 +248,7 @@ Mk2 is a table and indoor robot; rugged terrain needs bigger wheels, suspension 
    - Wi-Fi bridge on the ESP32 (UDP telemetry, MJPEG camera stream);
    - retrain YOLO on real photos of your token;
    - record real screams into `simulation3d/screams/`.
-9. Retrain the RL navigation policy in the simulator with `rl_reward.py`. Keep it only if it beats the rule-based brain (80% / 72%).
+9. Retrain the RL navigation policy in the simulator with `rl_reward.py`. Keep it only if it beats the rule-based brain (70% / 72%). Tune the edge margin to win back hidden-token success without new falls.
 10. Lab trials: 10+ runs of each demo; compare with the simulation.
 
-**Status:** Mk2 designed in Fusion (printable and detailed versions), firmware builds, and the full system has been tested in a 3D simulation: 80% hidden-token and 72% scream-homing success. Submission files are ready apart from team names and the advisor.
+**Status:** Mk2 designed in Fusion (printable and detailed versions), firmware builds, and the full system has been tested in a 3D simulation: 70% hidden-token and 72% scream-homing success, 1 fall in 120 missions. Submission files are ready apart from team names and the advisor.

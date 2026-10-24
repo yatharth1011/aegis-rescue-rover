@@ -11,7 +11,7 @@ This is a realistic, all-virtual test of the whole system on one Mac. Nothing is
 | **Victim token and decoys** | Free physical objects: pushed, funnelled and dragged by real contact physics. Decoys are orange cube, red ball and orange disc | The detector has to tell shape apart, not just colour |
 | **Wheels, motors, encoders, gyro** | The firmware's own PI loops and stall detector (C code, `core_ffi`). Skid factor ±12 % off calibration; slip noise | Gyro residual bias after boot calibration is about 0.05°/s |
 | **Distance sensors** | 3 × VL53L0X as 25° cones (5 rays); 33 ms update; noise; 2 m range | Low objects are invisible to them, as on the real rover |
-| **Table-edge and capture IR** | Geometric checks at the real sensor positions | |
+| **Table-edge and capture IR** | Geometric checks at the real sensor positions: 5 edge sensors (front-left, front-right, rear, both rear corners) and 1 capture sensor | Rear corners were added after the simulation showed falls |
 | **Camera** | MuJoCo render from the mast, tilted 30° down; 320 × 240; JPEG; noise | |
 | **Detector** | **YOLOv8n trained on 4,800 rendered frames on the M5 GPU**. Validation: 98.9 % recall, 98.7 % precision | Trained on renders only: retrain on real photos of the real token before the demo |
 | **Sound** | pyroomacoustics 6 × 5 × 3 m room (image-source echoes, air absorption), a fan in a corner, mic self-noise. Synthetic screams with formants | Scream detector: 80/80 screams caught, 0/160 false alarms on talking and fan noise. All synthetic: record real screams into `screams/` |

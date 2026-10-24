@@ -407,6 +407,7 @@ DETAIL = {
     'XL4015_Logic_5V': (d_xl4015, 0.0), 'XL4015_Servo_5V': (d_xl4015, 0.0), 'PCF8574_IO_Expander': (d_pcf8574, 0.0),
     'VL53L0X_Front': (d_vl53, 0.0), 'VL53L0X_Left': (d_vl53, 0.0), 'VL53L0X_Right': (d_vl53, 0.0),
     'IR_Cliff_FL': (d_tcrt, 0.0), 'IR_Cliff_FR': (d_tcrt, 0.0), 'IR_Cliff_Rear': (d_tcrt, 0.0),
+    'IR_Cliff_RL': (d_tcrt, 0.0), 'IR_Cliff_RR': (d_tcrt, 0.0),
     'IR_Capture_Sensor': (d_ir_capture, 0.0),
 }
 
@@ -421,6 +422,7 @@ FOOTPRINTS_LOWER_TOP = [
 ]
 FOOTPRINTS_LOWER_BOTTOM = [
     ('CLIFF FL', 66.0, 52.0, 32.0, 14.0), ('CLIFF FR', 130.0, -50.0, 32.0, 14.0), ('CLIFF R', -108.0, 0.0, 32.0, 14.0),
+    ('CLIFF RL', -108.0, 45.0, 14.0, 32.0), ('CLIFF RR', -108.0, -45.0, 14.0, 32.0),
 ]
 FOOTPRINTS_UPPER_TOP = [
     ('ESP32-S3  USB<', -40.0, 0.0, 63.0, 26.0), ('MPU6050', 10.0, 0.0, 21.0, 16.0), ('MIC L', 0.0, 50.0, 14.0, 14.0),
@@ -757,6 +759,10 @@ def build(out_dir=None, detailed=False):
     # IR modules: three table-edge (cliff) sensors under the lower deck, one capture sensor in the bay
     for nm, x, y in (('IR_Cliff_FL', 66.0, 52.0), ('IR_Cliff_FR', 130.0, -50.0), ('IR_Cliff_Rear', -108.0, 0.0)):
         board(nm, 32.0, 14.0, 1.6, 'pcb_black', [(10.0, 0, 10.0, 6.0, 5.0, 'lens')], (x, y, lz0), [(180.0, 'x')])
+    # rear-corner cliff sensors (board along Y, lens outboard near each rear wheel)
+    for nm, sy in (('IR_Cliff_RL', 1), ('IR_Cliff_RR', -1)):
+        board(nm, 32.0, 14.0, 1.6, 'pcb_black', [(10.0, 0, 10.0, 6.0, 5.0, 'lens')], (-108.0, sy * 45.0, lz0),
+              [(180.0, 'x'), (-90.0 * sy, 'z')])
     board('IR_Capture_Sensor', 14.0, 22.0, 1.6, 'pcb_black', [(0, 6.0, 6.0, 9.0, 5.0, 'lens')],
           (P['bay_x0'] + 3.0, 0.0, 26.0), [(90.0, 'y')])
 

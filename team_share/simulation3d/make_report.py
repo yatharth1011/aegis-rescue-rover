@@ -115,6 +115,9 @@ def main():
         viz.plot_run(rec, info, title, os.path.join(R, "example_demo%d.png" % demo))
         viz.animate_run(rec, info, title.split(" (")[0], os.path.join(R, "example_demo%d.gif" % demo))
         print("recorded", demo, seed, r["outcome"])
+        summary.setdefault("example_seeds", {})[str(demo)] = seed
+        with open(os.path.join(R, "summary.json"), "w") as f:
+            json.dump(summary, f, indent=2)
 
 
 if __name__ == "__main__":

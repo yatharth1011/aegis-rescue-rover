@@ -31,7 +31,7 @@ from world import CAM, TABLE, TOKEN
 
 RES = 0.02
 INFLATE = 0.14            # m: obstacle clearance for the rover centre (turning sweep ~0.16 m)
-EDGE_KEEP = 0.17          # m: keep the centre this far from table edges
+EDGE_KEEP = 0.20          # m: keep the centre this far from table edges (0.17 let a rear wheel slip over)
 V_MAX = 0.16
 W_MAX = 1.6
 
@@ -101,7 +101,8 @@ class Brain:
     def cell(self, x, y):
         return int(np.clip(x / RES, 0, self.nx - 1)), int(np.clip(y / RES, 0, self.ny - 1))
 
-    CLIFF_POS = {"FL": (0.076, 0.052), "FR": (0.140, -0.050), "R": (-0.098, 0.0)}
+    CLIFF_POS = {"FL": (0.076, 0.052), "FR": (0.140, -0.050), "R": (-0.098, 0.0),
+                 "RL": (-0.108, 0.055), "RR": (-0.108, -0.055)}
 
     def on_telem(self, m):
         self.telem = m

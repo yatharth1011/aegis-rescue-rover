@@ -142,7 +142,7 @@ def add_story(prs, paths, sim):
              ("64 x 46 mm", "intake bay with a servo-driven door"),
              ("4WD", "N20 150:1 gearmotors with encoders"),
              ("2 brains", "ESP32-S3 on board, laptop over Wi-Fi"),
-             ("9 sensors", "3 laser ToF, 2 mics, IMU, camera, 4 IR"),
+             ("13 sensors", "3 laser ToF, 2 mics, IMU, camera, 6 IR"),
              ("263 x 140 x 148 mm", "about 1 kg, 3S Li-ion 10C pack")]
     y = E(1.55)
     for big, small in specs:
@@ -239,8 +239,8 @@ def add_story(prs, paths, sim):
     sets = sim.get("sets", {})
     nums = [("%d %%" % round(sets["final_demo1"]["success_pct"]), "hidden-victim missions\ncompleted end to end"),
             ("%d %%" % round(sets["final_demo2"]["success_pct"]), "scream-homing missions\ncompleted end to end"),
-            ("37 / 40", "missions where the victim\nwas found (both demos)"),
-            ("%d-%d %%" % (round(sets["final_demo1_badlink"]["success_pct"]), round(sets["final_demo2_badlink"]["success_pct"])),
+            ("%d %%" % round((sets["final_demo1"]["found_pct"] + sets["final_demo2"]["found_pct"]) / 2), "of missions where the victim\nwas found (both demos)"),
+            ("%d-%d %%" % tuple(sorted((round(sets["final_demo1_badlink"]["success_pct"]), round(sets["final_demo2_badlink"]["success_pct"])))),
              "still completed on a bad\nWi-Fi link (20 % loss)")]
     for i, (big, small) in enumerate(nums):
         x = M + i * E(3.1)
@@ -259,8 +259,8 @@ def add_story(prs, paths, sim):
              ("Power", "Worst case 5.8 A = 2.7 C on a 10 C pack. Separate 5 V rails for logic and servo."),
              ("Drive", "Hardest manoeuvre needs 27 % of motor torque. 0.37 m/s top speed."),
              ("Terrain (3D physics)", "Climbs 25° slopes and 1 cm bumps; a 6 mm kerb stops it. Built for tables and floors."),
-             ("Simulation found bugs", "Bay trigger, door clearance, front/back sound confusion, zig-zag search, pinned recovery: all fixed."),
-             ("Budget", "Rs 11,085 of Rs 15,000, 19 items, 18 with live Robu.in links checked.")]
+             ("Simulation found bugs", "Bay trigger, door clearance, front/back sound confusion, zig-zag search, pinned recovery, rear-corner falls: all fixed."),
+             ("Budget", "Rs 11,183 of Rs 15,000, 19 items, 18 with live Robu.in links checked.")]
     tw, th = E(3.85), E(2.1)
     for i, (head, body) in enumerate(tiles):
         x = M + (i % 3) * (tw + E(0.2))
@@ -274,9 +274,9 @@ def add_story(prs, paths, sim):
     # ---------- 12. budget ---------------------------------------------------------------------------------
     s = prs.slides.add_slide(blank)
     bg(s, WHITE)
-    title(s, "Budget", "Rs 11,085 of Rs 15,000, with Rs 3,915 in reserve", dark=False)
+    title(s, "Budget", "Rs 11,183 of Rs 15,000, with Rs 3,817 in reserve", dark=False)
     groups = [("Motion: 4 gearmotors, 2 drivers, wheels", 2690), ("Power: 3S pack, charger, 2 buck converters", 2576),
-              ("Brains and vision: ESP32-S3, ESP32-CAM, programmer", 1997), ("Sensing: ToF x3, IMU, mics, IR x4, I/O expander", 1684),
+              ("Brains and vision: ESP32-S3, ESP32-CAM, programmer", 1997), ("Sensing: ToF x3, IMU, mics, IR x6, I/O expander", 1782),
               ("Structure: PLA+, acrylic, M3 hardware", 1679), ("Rescue mechanism: MG946R servo", 459)]
     total_w = W - 2 * M
     x = M
@@ -311,7 +311,7 @@ def add_story(prs, paths, sim):
     s = prs.slides.add_slide(blank)
     bg(s, WHITE)
     title(s, "What we know is not solved yet", "Honest limits, and the plan to close them", dark=False)
-    limits = ["2 of 40 scream runs fell off the table: tune the edge reflex; AI reward now punishes falling and tipping",
+    limits = ["Edge safety costs search time: rear-corner edge sensors cut falls to 1 in 120 missions (on bad Wi-Fi), but the wider edge margin lowered hidden-victim success from 80 % to 70 %; tune it",
               "Detector trained on renders: retrain on real photos of our victim token",
               "Synthetic screams: record real ones for the scream detector",
               "Flat surfaces only: rugged terrain needs bigger wheels and suspension (future Mk3)"]
@@ -357,7 +357,7 @@ def add_story(prs, paths, sim):
     txt(s, M, E(1.6), W - 2 * M, E(0.4), "OUR REQUEST", size=14, bold=True, color=ACCENT, align=PP_ALIGN.CENTER)
     txt(s, M, E(2.1), W - 2 * M, E(1.2), "Approve A.E.G.I.S. for the TL101 build", size=40, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
     txt(s, E(1.5), E(3.5), W - E(3.0), E(1.6),
-        [[("Designed in Fusion, simulated end to end, budgeted at Rs 11,085. ", {"bold": True, "color": WHITE}),
+        [[("Designed in Fusion, simulated end to end, budgeted at Rs 11,183. ", {"bold": True, "color": WHITE}),
           ("On demo day the rover will find a hidden victim, home in on a scream, take the victim inside "
            "and bring it back, on a real table, in front of you.", {})]],
         size=18, color=SOFT, align=PP_ALIGN.CENTER)
