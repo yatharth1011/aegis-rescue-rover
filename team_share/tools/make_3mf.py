@@ -1,5 +1,5 @@
 """
-Print-ready 3MF of every PLA part, oriented flat on the bed and laid out on 220 x 220 mm plates.
+Print-ready 3MF of every PLA part, oriented flat on the bed and laid out for the Creality K1 Max (300 x 300 mm bed).
 
     ~/aegis_venv/bin/python team_share/tools/make_3mf.py
     -> team_share/print/AEGIS_PLA_parts.3mf (+ one STL per part)
@@ -101,7 +101,7 @@ def main():
     parts += [("Motor_Hanger_%d" % (i + 1), h.copy()) for i in range(4)]
     parts += props()
 
-    # plate 1: rover parts, plate 2: demo props; simple shelf packing on 220 x 220
+    # plate 1: rover parts, plate 2: demo props; simple shelf packing on the 300 x 300 K1 Max bed
     plates, report = [[], []], []
     for name, m in parts:
         m = on_bed(m)
@@ -113,11 +113,11 @@ def main():
     for k, plate in enumerate(plates):
         x = y = row_h = 0.0
         for name, m in sorted(plate, key=lambda t: -t[1].extents[1]):
-            if x + m.extents[0] > 220:
+            if x + m.extents[0] > 290:
                 x, y, row_h = 0.0, y + row_h + 8, 0.0
-            assert y + m.extents[1] <= 220, "plate %d overflow" % (k + 1)
+            assert y + m.extents[1] <= 290, "plate %d overflow" % (k + 1)
             mm = m.copy()
-            mm.apply_translation((x + k * 260.0, y, 0))      # plates side by side in the file
+            mm.apply_translation((x + k * 320.0, y, 0))      # plates side by side in the file
             scene.add_geometry(mm, node_name="plate%d_%s" % (k + 1, name), geom_name=name)
             x, row_h = x + m.extents[0] + 8, max(row_h, m.extents[1])
     f = os.path.join(OUT, "AEGIS_PLA_parts.3mf")
