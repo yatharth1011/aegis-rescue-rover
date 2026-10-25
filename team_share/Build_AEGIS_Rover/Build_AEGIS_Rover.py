@@ -182,6 +182,21 @@ def slot_cut(comp, top_z, depth, x0, y0, x1, y1, r):
     comp.features.extrudeFeatures.addSimple(largest_profile(sk), adsk.core.ValueInput.createByReal(-depth * MM), CUT)
 
 
+def prism_xz(comp, pts_xz, width, op=NEW):
+    """Closed (x, z) outline in the component XZ plane, extruded symmetrically along Y to the full width."""
+    sk = comp.sketches.add(comp.xZConstructionPlane)
+    lines = sk.sketchCurves.sketchLines
+    sp = [sk.modelToSketchSpace(pt(x, 0, z)) for x, z in pts_xz]
+    first = lines.addByTwoPoints(sp[0], sp[1])
+    prev = first
+    for p in sp[2:]:
+        prev = lines.addByTwoPoints(prev.endSketchPoint, p)
+    lines.addByTwoPoints(prev.endSketchPoint, first.startSketchPoint)
+    ei = comp.features.extrudeFeatures.createInput(largest_profile(sk), op)
+    ei.setSymmetricExtent(adsk.core.ValueInput.createByReal(width * MM), True)
+    return comp.features.extrudeFeatures.add(ei)
+
+
 def hex_prism(comp, af, h, cx, cy, z0):
     r = af / math.sqrt(3.0)
     return poly_prism(comp, [(cx + r * math.cos(math.radians(60 * i)), cy + r * math.sin(math.radians(60 * i)))
@@ -528,6 +543,7 @@ def build(out_dir=None, detailed=False):
     pillars = [(-100.0, 52.0), (-100.0, -52.0), (85.0, 52.0), (85.0, -52.0)]
     hanger_bolts = [(ax + sx, sy * 34.0) for ax in axles for sx in (-6.5, 6.5) for sy in (1, -1)]
     shroud_bolts = [(x, sy * 38.5) for x in (55.0, 85.0) for sy in (1, -1)]
+    mast_bolts = [(64.0, sy * 11.0) for sy in (1, -1)]               # M3 x 10 up through the upper deck, nut on the mast base
     rigid = []
 
     # --- lower deck -----------------------------------------------------------------
@@ -548,7 +564,7 @@ def build(out_dir=None, detailed=False):
     o = new_comp(root, 'Upper_Deck_Acrylic')
     c = o.component
     rounded_box(c, P['upper_x0'], -hw, P['upper_x1'], hw, P['deck_r'], uz0, P['deck_t'])
-    holes(c, uz1, P['deck_t'], [(3.2, x, y) for x, y in pillars])
+    holes(c, uz1, P['deck_t'], [(3.2, x, y) for x, y in pillars + mast_bolts])
     slot_cut(c, uz1, P['deck_t'], -30.0, -6.0, 10.0, 6.0, 6.0)
     sw_x, sw_y = P['switch_x'], P['switch_y']                       # rocker switch cutout (19.4 x 13.2)
     slot_cut(c, uz1, P['deck_t'], sw_x - 9.7, sw_y - 6.6, sw_x + 9.7, sw_y + 6.6, 2.0)
@@ -606,6 +622,9 @@ def build(out_dir=None, detailed=False):
     box(c, 3.0, 26.0, 35.0, 7.7, 0, 15.0)
     box(c, 18.4, 26.0, 22.8, 0, 0, 27.2, JOIN)                     # bridge to the deck
     holes(c, 50.0, 22.8, [(2.5, -6.5, 0), (2.5, 6.5, 0)])
+    for sy in (1, -1):                                             # 2.5 mm cable-tie path that holds the motor up in the slot:
+        box(c, 18.4, 3.5, 2.0, 0, sy * 8.0, 28.5, CUT)             # tunnel through the bridge just above the gearbox / can
+        box(c, 18.4, 3.5, 2.2, 0, sy * 8.0, 15.0, CUT)             # notch in both cheek bottoms so the tie bears on the motor
     look.paint(c, 'pla_dark', PLA)
     hanger_comp = c
     hanger_occ = o
@@ -653,7 +672,7 @@ def build(out_dir=None, detailed=False):
     holes(c, lz0, 3.0, [(3.2, x, y) for x, y in shroud_bolts])
     box(c, 3.0, wt, lz0 - 3.0 - (P['door_top'] + 1.0), P['bay_x1'] + 1.5, -bhw - wt / 2, P['door_top'] + 1.0, JOIN)  # fin bridge above the door
     poly_prism(c, [(P['bay_x1'] + 3.0, -bhw), (P['bay_x1'] + 3.0, -bhw - wt), (P['bay_x1'] + 20.0, -bhw - 13.0),
-                   (P['bay_x1'] + 20.0, -bhw - 10.0)], fz, wall_h - 3.0, JOIN)              # right funnel fin
+                   (P['bay_x1'] + 20.0, -bhw - 10.0)], fz, wall_h, JOIN)                    # right funnel fin (full height: prints flange-down)
     box(c, 3.0, 12.0, 16.0, P['bay_x0'] + 1.5, 0, 18.0, JOIN)                                # capture-sensor boss
     look.paint(c, 'pla', PLA)
     rigid.append(o)
@@ -668,6 +687,7 @@ def build(out_dir=None, detailed=False):
     for i in range(4):                                                                        # outside stiffening ribs
         box(c, 2.0, 2.0, door_h, 2.5, -14.0 - i * 18.0, 0, JOIN)
     holes(c, door_h + 1.5, 4.0, [(5.8, 0, 0)])                                                # spline socket
+    revolve_z(c, [(0.0, door_h - 13.0), (1.5, door_h - 13.0), (6.0, door_h - 8.5), (0.0, door_h - 8.5)])  # 45 deg cone under the hub: prints without support
     look.paint(c, 'pla', PLA)
     door_occ = o
     door_pt = origin_point(c)
@@ -788,6 +808,9 @@ def build(out_dir=None, detailed=False):
     c = o.component
     box(c, 22.0, 34.0, 3.0, 0, 0, 0)
     box(c, 6.0, 34.0, 56.0, -6.0, 0, 3.0, JOIN)
+    # camera pad: its sloped face is parallel to the ESP32-CAM back, 2 mm behind it (foam tape)
+    prism_xz(c, [(-3.5, 38.4), (8.89, 59.0), (-3.5, 59.0)], 34.0, JOIN)
+    holes(c, 3.0, 3.0, [(3.2, x - 60.0, y) for x, y in mast_bolts])
     look.paint(c, 'pla', PLA)
     rigid.append(o)
     cam = new_comp(root, 'ESP32_CAM_OV2640', mat(66.0, 0, uz1 + 50.0, [(90.0 + P['cam_tilt_deg'], 'y')]))
