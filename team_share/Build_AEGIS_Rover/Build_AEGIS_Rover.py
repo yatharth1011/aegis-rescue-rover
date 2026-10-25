@@ -625,6 +625,27 @@ def build(out_dir=None, detailed=False):
     for sy in (1, -1):                                             # 2.5 mm cable-tie path that holds the motor up in the slot:
         box(c, 18.4, 3.5, 2.0, 0, sy * 8.0, 28.5, CUT)             # tunnel through the bridge just above the gearbox / can
         box(c, 18.4, 3.5, 2.2, 0, sy * 8.0, 15.0, CUT)             # notch in both cheek bottoms so the tie bears on the motor
+    # 1 mm fillets on the four outer vertical corners; 0.5 mm chamfer on the screw-hole entries (guides the M3 screws)
+    try:
+        body = c.bRepBodies.item(0)
+        corners, rims = adsk.core.ObjectCollection.create(), adsk.core.ObjectCollection.create()
+        for e in body.edges:
+            g = e.geometry
+            if isinstance(g, adsk.core.Line3D):
+                p0, p1 = g.startPoint, g.endPoint
+                if abs(p0.x - p1.x) < 1e-6 and abs(p0.y - p1.y) < 1e-6 and \
+                        abs(abs(p0.x) - 0.92) < 1e-4 and abs(abs(p0.y) - 1.3) < 1e-4:
+                    corners.add(e)
+            elif isinstance(g, adsk.core.Circle3D) and abs(g.radius - 0.125) < 1e-4 and abs(g.center.z - 5.0) < 1e-4:
+                rims.add(e)
+        fi = c.features.filletFeatures.createInput()
+        fi.addConstantRadiusEdgeSet(corners, adsk.core.ValueInput.createByReal(0.1), True)
+        c.features.filletFeatures.add(fi)
+        ci = c.features.chamferFeatures.createInput2()
+        ci.chamferEdgeSets.addEqualDistanceChamferEdgeSet(rims, adsk.core.ValueInput.createByReal(0.05), True)
+        c.features.chamferFeatures.add(ci)
+    except Exception as e:
+        print('hanger fillet/chamfer skipped: %s' % e)
     look.paint(c, 'pla_dark', PLA)
     hanger_comp = c
     hanger_occ = o
