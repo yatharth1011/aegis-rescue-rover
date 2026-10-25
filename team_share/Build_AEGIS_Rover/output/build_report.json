@@ -1,15 +1,11 @@
 {
   "occurrences": 46,
   "parameters": 37,
-  "mass_g_rover": 1662.4,
+  "mass_g_rover": 1661.9,
   "bbox_mm": [
     394.0,
     140.0,
     147.7
   ],
-  "unexpected_clashes": [
-    "Upper_Deck_Acrylic <-> Power_Switch_Rocker (4.0 mm3)",
-    "Intake_Shroud_PLA <-> IR_Cliff_FR (0.9 mm3)",
-    "Intake_Door_PLA <-> Intake_Door_PLA (49.0 mm3)"
-  ]
+  "unexpected_clashes": []
 }

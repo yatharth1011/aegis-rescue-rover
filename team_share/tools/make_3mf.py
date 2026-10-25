@@ -84,6 +84,12 @@ def door():
     return m                                                   # knuckle and leaf on the bed, socket opening up
 
 
+def tof_bracket():                               # L-bracket that holds a VL53L0X board upright (foam tape on both faces)
+    pts = [(0, 0), (12, 0), (12, 3), (3, 3), (3, 20), (0, 20)]   # L profile: 12 mm foot, 20 mm upright, 3 mm thick
+    from shapely.geometry import Polygon
+    return trimesh.creation.extrude_polygon(Polygon(pts), 26.0)   # printed lying on its side: no supports
+
+
 def props():
     token = cyl(40.0, 0, 40.0)                                 # victim token: print orange, add a white band
     cube = box((-20, -20, 0), (20, 20, 40))                    # decoy 1: orange cube
@@ -102,6 +108,7 @@ def main():
     parts = [("Intake_Shroud", shroud()), ("Intake_Door", door()), ("Camera_Mast", mast())]
     h = hanger()
     parts += [("Motor_Hanger_%d" % (i + 1), h.copy()) for i in range(4)]
+    parts += [("ToF_Bracket_%s" % k, tof_bracket()) for k in ("Front", "Left", "Right")]
     parts += props()
 
     # plate 1: rover parts, plate 2: demo props; simple shelf packing on the 300 x 300 K1 Max bed
