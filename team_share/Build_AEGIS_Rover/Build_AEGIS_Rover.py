@@ -39,6 +39,8 @@ P = {
     'servo_L': 40.7, 'servo_W': 19.7, 'servo_H': 36.1, 'servo_ear_h': 26.9, 'servo_spline_off': 10.35,
     # sensors
     'mic_spacing': 100.0, 'cam_tilt_deg': 30.0,
+    # electronics layout: ESP32-S3 on its perfboard carrier, main power switch through the upper deck
+    'esp_x': -63.0, 'switch_x': -85.0, 'switch_y': 40.0,
     # target used in renders and in the demo
     'token_d': 40.0, 'token_h': 40.0,
 }
@@ -418,14 +420,14 @@ DETAIL = {
 FOOTPRINTS_LOWER_TOP = [
     ('BATTERY 3S 18650', -75.0, 0.0, 65.0, 56.0), ('TB6612 A', -25.0, 32.0, 20.3, 20.3), ('TB6612 B', -25.0, -32.0, 20.3, 20.3),
     ('XL4015 LOGIC 5V0', 32.0, 32.0, 51.0, 26.0), ('XL4015 SERVO 5V0', 32.0, -32.0, 51.0, 26.0),
-    ('PCF8574', 80.0, -30.0, 40.0, 16.0), ('TOF FRONT', 135.0, 0.0, 6.0, 25.0),
+    ('PCF8574', 80.0, -30.0, 40.0, 16.0), ('TOF FRONT', 135.0, 0.0, 6.0, 25.0), ('FUSE', -58.0, 44.0, 30.0, 14.0),
 ]
 FOOTPRINTS_LOWER_BOTTOM = [
     ('CLIFF FL', 66.0, 52.0, 32.0, 14.0), ('CLIFF FR', 130.0, -50.0, 32.0, 14.0), ('CLIFF R', -108.0, 0.0, 32.0, 14.0),
     ('CLIFF RL', -108.0, 45.0, 14.0, 32.0), ('CLIFF RR', -108.0, -45.0, 14.0, 32.0),
 ]
 FOOTPRINTS_UPPER_TOP = [
-    ('ESP32-S3  USB<', -40.0, 0.0, 63.0, 26.0), ('MPU6050', 10.0, 0.0, 21.0, 16.0), ('MIC L', 0.0, 50.0, 14.0, 14.0),
+    ('ESP32-S3 CARRIER  USB<', -63.0, 0.0, 66.0, 34.0), ('MPU6050', 10.0, 0.0, 21.0, 16.0), ('MIC L', 0.0, 50.0, 14.0, 14.0),
     ('MIC R', 0.0, -50.0, 14.0, 14.0), ('CAM MAST', 60.0, 0.0, 22.0, 34.0), ('TOF L', 40.0, 55.5, 25.0, 6.0),
     ('TOF R', 40.0, -55.5, 25.0, 6.0),
 ]
@@ -548,6 +550,8 @@ def build(out_dir=None, detailed=False):
     rounded_box(c, P['upper_x0'], -hw, P['upper_x1'], hw, P['deck_r'], uz0, P['deck_t'])
     holes(c, uz1, P['deck_t'], [(3.2, x, y) for x, y in pillars])
     slot_cut(c, uz1, P['deck_t'], -30.0, -6.0, 10.0, 6.0, 6.0)
+    sw_x, sw_y = P['switch_x'], P['switch_y']                       # rocker switch cutout (19.4 x 13.2)
+    slot_cut(c, uz1, P['deck_t'], sw_x - 9.7, sw_y - 6.6, sw_x + 9.7, sw_y + 6.6, 2.0)
     look.paint(c, 'acrylic', ACRYLIC)
     rigid.append(o)
 
@@ -729,7 +733,8 @@ def build(out_dir=None, detailed=False):
 
     board('ESP32_S3_DevKitC', 63.0, 26.0, 1.6, 'pcb_black',
           [(14.0, 0, 18.0, 19.5, 3.2, 'metal'), (-29.0, 0, 7.5, 9.0, 3.0, 'metal'),
-           (0, 11.5, 50.0, 2.5, 8.0, 'pcb_black'), (0, -11.5, 50.0, 2.5, 8.0, 'pcb_black')], (-40.0, 0, uz1))
+           (0, 11.5, 50.0, 2.5, 8.0, 'pcb_black'), (0, -11.5, 50.0, 2.5, 8.0, 'pcb_black')], (P['esp_x'], 0, uz1 + 1.6))
+    board('ESP32_Carrier_Perfboard', 66.0, 34.0, 1.6, 'pcb_green', [], (P['esp_x'], 0, uz1))   # sockets, pull-ups, divider
     board('MPU6050_IMU', 21.0, 16.0, 1.6, 'pcb_blue', [(0, 0, 4.0, 4.0, 1.0, 'chip')], (10.0, 0, uz1))
     for sy, nm in ((1, 'INMP441_Mic_L'), (-1, 'INMP441_Mic_R')):
         board(nm, 14.0, 14.0, 1.6, 'pcb_blue', [(0, 0, 3.5, 4.5, 1.0, 'metal')],
@@ -743,6 +748,18 @@ def build(out_dir=None, detailed=False):
         if not detailed:
             cyl(b.component, 8.0, 12.0, -20.0, 6.0, 1.6)                                      # capacitor
     board('PCF8574_IO_Expander', 40.0, 16.0, 1.6, 'pcb_blue', [(0, 0, 9.0, 6.0, 2.0, 'chip')], (80.0, -30.0, lz1))
+    board('Fuse_Holder_Board', 30.0, 14.0, 1.6, 'pcb_green', [(0, 0, 22.0, 7.0, 9.0, 'pla_dark')], (-58.0, 44.0, lz1))
+
+    # main power switch (oval rocker, KCD1 style): bezel on the upper deck, body and tabs between the decks
+    o = new_comp(root, 'Power_Switch_Rocker', mat(P['switch_x'], P['switch_y'], uz1))
+    c = o.component
+    box(c, 21.0, 15.0, 2.0, 0, 0, 0)                                   # bezel
+    box(c, 16.0, 10.0, 4.0, 0, 0, 2.0, JOIN)                           # rocker
+    box(c, 19.0, 12.8, 18.0, 0, 0, -18.0, JOIN)                        # body through the deck
+    for dx in (-4.0, 4.0):
+        box(c, 0.8, 4.8, 7.0, dx, 0, -25.0, JOIN)                      # solder tabs
+    look.paint(c, 'pla_dark', ['ABS Plastic', 'ABS'])
+    rigid.append(o)
 
     # ToF sensors on vertical carriers (board normal = viewing direction)
     def tof(name, x, y, yaw):
@@ -842,7 +859,11 @@ def build(out_dir=None, detailed=False):
             wire(wc, look, [(-42.0, 0.0, bt - 4), (-30.0, sy * 20.0, lz1 + 8), (-25.0, sy * 41.0, lz1 + 4.2)], 1.6, 'w_red')
         # logic buck -> ESP32 5 V through the upper-deck slot
         wire(wc, look, [(53.0, 30.0, lz1 + 14.0), (20.0, 10.0, lz1 + 22.0), (-10.0, 0.0, uz0 - 4.0), (-10.0, 0.0, uz1 + 3.0),
-                        (-30.0, 11.4, uz1 + 9.0)], 1.6, 'w_red')
+                        (-53.0, 11.4, uz1 + 9.0)], 1.6, 'w_red')
+        # battery + -> power switch -> fuse board, before the distribution above
+        wire(wc, look, [(-39.0, 10.0, bt), (-39.0, 32.0, lz1 + 12.0), (-80.0, 34.0, lz1 + 10.0),
+                        (P['switch_x'] - 4.0, P['switch_y'], lz1 + 6.5)], 2.2, 'w_red')
+        wire(wc, look, [(P['switch_x'] + 4.0, P['switch_y'], lz1 + 6.5), (-76.0, 48.0, lz1 + 7.0), (-71.0, 44.0, lz1 + 5.0)], 2.2, 'w_red')
         # servo buck -> servo
         wire(wc, look, [(53.0, -30.0, lz1 + 14.0), (80.0, 0.0, lz1 + 20.0), (servo_cx - 22.0, hy, lz1 + 18.0)], 1.6, 'w_orange')
         # motor leads: drivers -> through the harness slot -> each motor's encoder end
@@ -851,15 +872,15 @@ def build(out_dir=None, detailed=False):
                             (ax, side * 20.0, 30.0), (ax, side * 16.0, 24.0)], 1.4, col)
         # I2C bus (yellow SDA, green SCL): ESP32 -> IMU -> side ToFs -> through slot -> PCF8574 and front ToF
         for off, col in ((0.0, 'w_yellow'), (2.0, 'w_green')):
-            wire(wc, look, [(-25.0, -11.4 + off, uz1 + 9.0), (10.0, -6.0 + off, uz1 + 4.0), (40.0, -45.0 + off, uz1 + 6.0),
+            wire(wc, look, [(-48.0, -11.4 + off, uz1 + 9.0), (10.0, -6.0 + off, uz1 + 4.0), (40.0, -45.0 + off, uz1 + 6.0),
                             (40.0, -55.0, uz1 + 8.0)], 1.2, col)
             wire(wc, look, [(10.0, 6.0 + off, uz1 + 4.0), (40.0, 45.0 + off, uz1 + 6.0), (40.0, 55.0, uz1 + 8.0)], 1.2, col)
-            wire(wc, look, [(-20.0, -11.4 + off, uz1 + 9.0), (-15.0, -2.0 + off, uz0 - 2.0), (40.0, -20.0 + off, lz1 + 6.0),
+            wire(wc, look, [(-43.0, -11.4 + off, uz1 + 9.0), (-15.0, -2.0 + off, uz1 + 5.0), (-15.0, -2.0 + off, uz0 - 2.0), (40.0, -20.0 + off, lz1 + 6.0),
                             (80.0, -24.0 + off, lz1 + 4.5), (133.0, 2.0 + off, lz1 + 8.0)], 1.2, col)
         # I2S microphones (blue) and camera UART (white)
         for sy in (1, -1):
-            wire(wc, look, [(-35.0, sy * 11.4, uz1 + 9.0), (-10.0, sy * 30.0, uz1 + 4.0), (0.0, sy * 44.0, uz1 + 3.0)], 1.2, 'w_blue')
-        wire(wc, look, [(-45.0, -11.4, uz1 + 9.0), (20.0, -8.0, uz1 + 12.0), (55.0, -10.0, uz1 + 35.0), (62.0, -12.0, uz1 + 48.0)],
+            wire(wc, look, [(-58.0, sy * 11.4, uz1 + 9.0), (-10.0, sy * 30.0, uz1 + 4.0), (0.0, sy * 44.0, uz1 + 3.0)], 1.2, 'w_blue')
+        wire(wc, look, [(-68.0, -11.4, uz1 + 9.0), (20.0, -8.0, uz1 + 12.0), (55.0, -10.0, uz1 + 35.0), (62.0, -12.0, uz1 + 48.0)],
              1.2, 'w_white')
 
     # --- assembly relationships --------------------------------------------------------
@@ -966,6 +987,7 @@ def build(out_dir=None, detailed=False):
         if detailed:
             upper = [o2 for o2 in root.occurrences if o2.component.name in
                      ('Upper_Deck_Acrylic', 'Camera_Mast_PLA', 'ESP32_CAM_OV2640', 'ESP32_S3_DevKitC', 'MPU6050_IMU',
+                      'ESP32_Carrier_Perfboard', 'Power_Switch_Rocker',
                       'INMP441_Mic_L', 'INMP441_Mic_R', 'VL53L0X_Left', 'VL53L0X_Right')]
             for o2 in upper:
                 o2.isLightBulbOn = False

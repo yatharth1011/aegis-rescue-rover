@@ -28,7 +28,7 @@ for col, h in enumerate(headers, 1):
     c.fill, c.font, c.alignment, c.border = HEADER_FILL, HEADER_FONT, center, grid
 ws.row_dimensions[1].height = 75
 
-# Prices incl. GST as listed on 23/24-Oct-2026.
+# Prices incl. GST as listed on 23-25 Oct 2026.
 items_data = [
     (1, 'WeAct Studio ESP32-S3-DevKitC-1 Development Board', 1, 1099, 'https://robu.in/product/weact-studio-esp32-s3-devkitc-1-esp32-s3-wifi-bluetooth-compatible-ble-5-0-mesh-development-board-esp32-wireless-module-micropython/', 'Main controller: motors, sensors, safety, Wi-Fi link to laptop'),
     (2, 'ESP32-CAM Wi-Fi + Bluetooth Module with OV2640 2MP Camera', 1, 779, 'https://robu.in/product/esp32-cam-wifi-module-bluetooth-iot-module/', 'Camera for victim detection. Out of stock on Robu.in (24-Oct-2026); re-check before ordering.'),
@@ -49,6 +49,22 @@ items_data = [
     (17, 'PCF8574T I2C I/O Extension Board', 1, 79, 'https://robu.in/product/pcf8574t-i2c-i-o-extension-board/', 'I/O expander for the IR sensors'),
     (18, 'TCRT5000 IR Tracking Sensor Module', 5, 49, 'https://robu.in/product/tcrt5000-ir-reflex-tracking-sensor-module/', 'Table-edge sensors (front-left, front-right, rear, two rear corners)'),
     (19, 'Infrared Obstacle Avoidance Sensor Module', 1, 89, 'https://robu.in/product/infrared-obstacle-avoidance-sensor-module/', 'Detects the victim inside the intake bay'),
+    (20, 'SafeConnect Nylon T-Connector Male Pigtail, 14 AWG, 15 cm', 1, 68, 'https://robu.in/product/safeconnect-nylon-t-connector-male-pigtail-with-14awg-silicon-wire-10cm/', "Battery power lead (mates with the pack's T-connector; the DC jack is for charging)"),
+    (21, '10A 250V AC SPST ON-OFF Oval Rocker Switch', 1, 42, 'https://robu.in/product/10a-250v-ac-spst-on-off-round-rocker-switch/', 'Main power switch, mounted in the upper deck'),
+    (22, 'BLX-A PCB Fuse Holder, 5 x 20 mm, 15 A', 1, 29, 'https://robu.in/product/black-blx-a-fuse-holder/', 'Battery fuse holder, on a small offcut of the prototype board'),
+    (23, 'Littelfuse 021506.3MXP Time-Delay Glass Fuse, 6.3 A, 5 x 20 mm', 2, 5, 'https://robu.in/product/021506-3mxp-fuse-glass-time-delay-6-3-a-250-v-5mm-x-20mm-0-2-x-0-79-215/', 'Battery fuse (one spare)'),
+    (24, '18AWG Silicone Wire, Red (per metre)', 1, 32, 'https://robu.in/product/18awg-high-voltage-silicone-wire-3000v-red/', 'Battery +, switch, fuse, motor-driver and buck inputs'),
+    (25, '18AWG Silicone Wire, Black (per metre)', 1, 32, 'https://robu.in/product/18awg-high-voltage-silicone-wire-3000v-black/', 'Battery - and ground star point'),
+    (26, '22AWG 3-Core Silicone Cable, Red-Black-Green (per metre)', 2, 69, 'https://robu.in/product/22awg-3-core-silicone-insulated-cable/', '5 V rails, servo power and motor leads'),
+    (27, '26AWG Ultra-Flexible Silicone Wire, Red (per metre)', 3, 7, 'https://robu.in/product/high-quality-ultra-flexible-26awg-silicone-wire-1000m-red/', '3.3 V sensor power'),
+    (28, '26AWG Ultra-Flexible Silicone Wire, Black (per metre)', 3, 8, 'https://robu.in/product/high-quality-ultra-flexible-26awg-silicone-wire-1000m-black/', 'Signal grounds'),
+    (29, '26AWG Ultra-Flexible Silicone Wire, White (per metre)', 3, 7, 'https://robu.in/product/high-quality-ultra-flexible-26awg-silicone-wire-1000m-white/', 'Signal wires: I2C, I2S, PWM, UART'),
+    (30, '26AWG Ultra-Flexible Silicone Wire, Green (per metre)', 3, 7, 'https://robu.in/product/high-quality-ultra-flexible-26awg-silicone-wire-1000m-green/', 'Signal wires: encoders and IR sensors'),
+    (31, '8 x 12 cm Universal PCB Prototype Board, Double-Sided', 1, 109, 'https://robu.in/product/812-cm-universal-pcb-prototype-board-double-sided/', 'ESP32-S3 carrier board (sockets, pull-ups, battery divider) and fuse mount'),
+    (32, '2.54 mm 1x20 Pin Female Header Strip', 4, 11, 'https://robu.in/product/2-54mm-1x20-pin-female-single-row-straight-header-strip-pack-of-5/', 'Sockets for the ESP32-S3 (two 22-pin rows)'),
+    (33, '2.54 mm 1x40 Pin Male Header Strip', 3, 9, 'https://robu.in/product/2-54mm-1x40-pin-male-single-row-straight-short-header-strip-pack-of-3/', 'Headers for the sensor modules and carrier board'),
+    (34, 'Metal Film Resistor Assorted Kit, 600 pcs, 30 values', 1, 189, 'https://robu.in/product/30-different-valued-metal-film-resistor-assorted-kit-for-diy-electronic-projects-and-experiments/', '2.2 kOhm I2C pull-ups; 100 kOhm / 20 kOhm battery divider'),
+    (35, '127 pcs Heat Shrink Tube Kit', 1, 146, 'https://robu.in/product/127pcs-black-heat-shrinkable-tube-kit-plastic-bag/', 'Insulating soldered joints'),
 ]
 
 for r, (n, name, qty, price, link, remark) in enumerate(items_data, start=2):

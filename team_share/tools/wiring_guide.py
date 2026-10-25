@@ -71,8 +71,8 @@ BOARDS = [  # name, w, h (mm), list of (side, [(pin, function, colour)])
 ]
 
 WIRES = [  # from, to, signal, colour key, gauge
-    ("Battery + (DC jack lead)", "Both XL4015 IN+, both TB6612 VM", "10.5-12.6 V", "12V", "20 AWG"),
-    ("Battery -", "Both XL4015 IN-, all GND", "0 V", "GND", "20 AWG"),
+    ("Battery + (T-connector lead)", "6.3 A fuse, power switch, then both XL4015 IN+ and both TB6612 VM", "10.5-12.6 V", "12V", "18 AWG"),
+    ("Battery -", "Both XL4015 IN-, all GND", "0 V", "GND", "18 AWG"),
     ("XL4015 logic OUT+", "ESP32-S3 5V, ESP32-CAM 5V", "5.0 V", "5V", "22 AWG"),
     ("XL4015 servo OUT+", "MG946R red", "5.0 V", "5V_servo", "22 AWG"),
     ("ESP32-S3 3V3", "sensors VCC, TB6612 VCC + PWMA/PWMB, encoders", "3.3 V", "3V3", "26 AWG"),
@@ -81,11 +81,11 @@ WIRES = [  # from, to, signal, colour key, gauge
     ("ESP32 GPIO 10 / 11", "front / left VL53L0X XSHUT (right: tie to VIN)", "address select", "XSHUT", "26 AWG"),
     ("ESP32 GPIO 12-18, 21", "TB6612 AIN1/AIN2/BIN1/BIN2", "20 kHz PWM", "PWM", "26 AWG"),
     ("ESP32 GPIO 46", "STBY on both TB6612", "enable", "PWM", "26 AWG"),
-    ("TB6612 AO1/AO2/BO1/BO2", "motor red / white", "motor power", "MOTOR", "24 AWG"),
+    ("TB6612 AO1/AO2/BO1/BO2", "motor red / white", "motor power", "MOTOR", "22 AWG"),
     ("Encoders yellow / green", "GPIO 38/39, 40/41, 42/47, 48/7", "quadrature", "ENC", "26 AWG"),
     ("ESP32 GPIO 3", "MG946R orange", "50 Hz servo pulse", "5V_servo", "26 AWG"),
     ("ESP32-CAM U0T", "ESP32 GPIO 2", "UART 115200", "UART", "26 AWG"),
-    ("Battery + via 100k / 22k divider", "ESP32 GPIO 1", "battery voltage", "VBAT", "26 AWG"),
+    ("Battery + via 100k / 20k", "ESP32 GPIO 1 (divider tapped after the switch)", "battery voltage", "VBAT", "26 AWG"),
     ("IR modules DO", "PCF8574 P0-P5", "5 cliff + bay capture", "IR", "26 AWG"),
 ]
 
@@ -191,7 +191,7 @@ def main():
     for i, (a, b, c, k, g) in enumerate(WIRES, start=1):
         t[i, 0].set_facecolor(C[k] + "33")
         t[i, 0].get_text().set_weight("bold")
-    ax.text(0.0, 0.02, "Common ground star point at the battery negative. Set both XL4015 outputs to 5.0 V with a meter before connecting "
+    ax.text(0.0, 0.02, "The fuse and the power switch sit in the battery + line before anything else. The 2.2 k pull-ups and the battery divider are on the ESP32-S3 carrier board.\nCommon ground star point at the battery negative. Set both XL4015 outputs to 5.0 V with a meter before connecting "
             "any board. Twist each motor's two leads together. Keep the I2S wires short (< 15 cm).\n"
             "Header orders follow the reference boards; clone modules sometimes differ: check the silkscreen before soldering.",
             fontsize=8, va="bottom", wrap=True)

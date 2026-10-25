@@ -167,7 +167,7 @@ def add_story(prs, paths, sim):
     txt(s, M + E(0.25), E(5.62), W - 2 * M - E(0.5), E(0.55),
         [[("Ready to fabricate: ", {"bold": True}),
           ("laser-cut and engrave DXFs (placement marks on both decks), STLs for 4 printed parts, STEP model, "
-           "a 19-line BOM with live Robu links, and firmware that builds for the ESP32-S3.", {})]], size=14)
+           "a 35-line BOM with live Robu links (wiring included), and firmware that builds for the ESP32-S3.", {})]], size=14)
     footer(s, n, dark=False)
     n += 1
 
@@ -256,11 +256,11 @@ def add_story(prs, paths, sim):
     bg(s, NAVY)
     title(s, "Engineering, not guesswork", "Checked before a single part is bought")
     tiles = [("Firmware", "Builds for the ESP32-S3 (ESP-IDF 5.3, FreeRTOS on both cores). 32/32 unit tests pass."),
-             ("Power", "Worst case 5.8 A = 2.7 C on a 10 C pack. Separate 5 V rails for logic and servo."),
+             ("Power", "Worst case 5.8 A = 2.7 C on a 10 C pack. Fused and switched; separate 5 V rails for logic and servo."),
              ("Drive", "Hardest manoeuvre needs 27 % of motor torque. 0.37 m/s top speed."),
              ("Terrain (3D physics)", "Climbs 25° slopes and 1 cm bumps; a 6 mm kerb stops it. Built for tables and floors."),
              ("Simulation found bugs", "Bay trigger, door clearance, front/back sound confusion, zig-zag search, pinned recovery, rear-corner falls: all fixed."),
-             ("Budget", "Rs 11,018 of Rs 15,000, 19 items, 18 with live Robu.in links checked.")]
+             ("Budget", "Rs 11,971 of Rs 15,000, 35 items including all wiring, 34 with live Robu.in links checked.")]
     tw, th = E(3.85), E(2.1)
     for i, (head, body) in enumerate(tiles):
         x = M + (i % 3) * (tw + E(0.2))
@@ -274,14 +274,15 @@ def add_story(prs, paths, sim):
     # ---------- 12. budget ---------------------------------------------------------------------------------
     s = prs.slides.add_slide(blank)
     bg(s, WHITE)
-    title(s, "Budget", "Rs 11,018 of Rs 15,000, with Rs 3,982 in reserve", dark=False)
+    title(s, "Budget", "Rs 11,971 of Rs 15,000, with Rs 3,029 in reserve", dark=False)
     groups = [("Motion: 4 gearmotors, 2 drivers, wheels", 2690), ("Power: 3S pack, charger, 2 buck converters", 2576),
               ("Brains and vision: ESP32-S3, ESP32-CAM, programmer", 1997), ("Sensing: ToF x3, IMU, mics, IR x6, I/O expander", 1782),
-              ("Structure: PLA+, acrylic, M3 hardware", 1514), ("Rescue mechanism: MG946R servo", 459)]
+              ("Structure: PLA+, acrylic, M3 hardware", 1514), ("Rescue mechanism: MG946R servo", 459),
+              ("Wiring: wire, connectors, switch, fuse, carrier board", 953)]
     total_w = W - 2 * M
     x = M
     cols_ = [RGBColor(0xEA, 0x6C, 0x1C), RGBColor(0x1F, 0x4E, 0x99), RGBColor(0x0F, 0x76, 0x6E), RGBColor(0x7C, 0x3A, 0xED),
-             RGBColor(0x64, 0x74, 0x8B), RGBColor(0xDC, 0x26, 0x26)]
+             RGBColor(0x64, 0x74, 0x8B), RGBColor(0xDC, 0x26, 0x26), RGBColor(0xCA, 0x8A, 0x04)]
     for (name, v), c in zip(groups, cols_):
         w = int(total_w * v / 15000)
         r = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, E(1.7), w, E(0.7))
@@ -295,14 +296,14 @@ def add_story(prs, paths, sim):
     r.line.color.rgb = LINE
     txt(s, x, E(1.85), M + total_w - x, E(0.4), "reserve", size=13, color=MUTED, align=PP_ALIGN.CENTER)
     for i, ((name, v), c) in enumerate(zip(groups, cols_)):
-        y = E(2.75) + i * E(0.5)
+        y = E(2.6) + i * E(0.47)
         dot = s.shapes.add_shape(MSO_SHAPE.OVAL, M, y + E(0.07), E(0.22), E(0.22))
         dot.fill.solid()
         dot.fill.fore_color.rgb = c
         dot.line.fill.background()
         txt(s, M + E(0.4), y, E(8.5), E(0.4), name, size=15)
         txt(s, E(9.5), y, E(1.5), E(0.4), "Rs %s" % format(v, ","), size=15, bold=True, align=PP_ALIGN.RIGHT)
-    txt(s, M, E(5.9), W - 2 * M, E(0.4), "Prices from Robu.in (acrylic sheet from Amazon.in, not sold on Robu), 24-Oct-2026. The laptop brain is the team's existing Mac: no Jetson needed.",
+    txt(s, M, E(5.9), W - 2 * M, E(0.4), "Prices from Robu.in (acrylic sheet from Amazon.in, not sold on Robu), 23-25 Oct 2026. The laptop brain is the team's existing Mac: no Jetson needed.",
         size=12, color=MUTED)
     footer(s, n, dark=False)
     n += 1
@@ -357,7 +358,7 @@ def add_story(prs, paths, sim):
     txt(s, M, E(1.6), W - 2 * M, E(0.4), "OUR REQUEST", size=14, bold=True, color=ACCENT, align=PP_ALIGN.CENTER)
     txt(s, M, E(2.1), W - 2 * M, E(1.2), "Approve A.E.G.I.S. for the TL101 build", size=40, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
     txt(s, E(1.5), E(3.5), W - E(3.0), E(1.6),
-        [[("Designed in Fusion, simulated end to end, budgeted at Rs 11,018. ", {"bold": True, "color": WHITE}),
+        [[("Designed in Fusion, simulated end to end, budgeted at Rs 11,971. ", {"bold": True, "color": WHITE}),
           ("On demo day the rover will find a hidden victim, home in on a scream, take the victim inside "
            "and bring it back, on a real table, in front of you.", {})]],
         size=18, color=SOFT, align=PP_ALIGN.CENTER)

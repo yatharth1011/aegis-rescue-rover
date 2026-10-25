@@ -16,7 +16,7 @@
 #define SERVO_US_MIN        900
 #define SERVO_US_MAX        2100
 
-/* ---- Battery sense: 100k / 22k divider on GPIO1 (ADC1_CH0) ------------- */
+/* ---- Battery sense: 100k / 20k divider on GPIO1 (ADC1_CH0) ------------- */
 #define VBAT_LOW_V          10.2f    /* 3.4 V/cell under load -> return home */
 #define VBAT_CUTOFF_V       9.9f     /* 3.3 V/cell -> FAULT, motors off */
 

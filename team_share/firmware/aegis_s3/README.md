@@ -81,7 +81,7 @@ The Q-table from `train_rl_policy.py` is still compiled in, behind `POLICY_USE_T
 | Encoders A / B: FL, RL, FR, RR | 38/39, 40/41, 42/47, 48/7 | Encoder VCC 3V3 |
 | Gripper servo signal | 3 | Servo power from XL4015 rail B (5.0 V), common ground |
 | ESP32-CAM TX → S3 RX | 2 | UART1, 115200 baud |
-| Battery sense | 1 | 100 kΩ / 22 kΩ divider from pack + |
+| Battery sense | 1 | 100 kΩ / 20 kΩ divider from pack + (after the fuse and switch) |
 | Start / abort | 0 | On-board BOOT button |
 
 Pins left unused on purpose:

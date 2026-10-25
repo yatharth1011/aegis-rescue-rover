@@ -52,6 +52,6 @@ enum { WHEEL_FL = 0, WHEEL_RL = 1, WHEEL_FR = 2, WHEEL_RR = 3, WHEEL_COUNT = 4 }
 #define PIN_CAM_RX          GPIO_NUM_2
 #define CAM_UART_BAUD       115200
 
-/* ---- Battery sense: 100k / 22k divider on GPIO1 (ADC1_CH0) ------------- */
+/* ---- Battery sense: 100k / 20k divider on GPIO1 (ADC1_CH0) ------------- */
 #define PIN_VBAT_ADC        GPIO_NUM_1
-#define VBAT_DIVIDER        ((100.0f + 22.0f) / 22.0f)
+#define VBAT_DIVIDER        ((100.0f + 20.0f) / 20.0f)

@@ -35,7 +35,7 @@ Safety never depends on the link: the edge sensors, distance sensors and watchdo
 
 **Search strategy.** The rover always runs a camera coverage search: it keeps a map of which parts of the table it has seen and drives to the viewpoint that reveals the most unseen area per metre travelled. When it hears a scream, the bearing (accumulated over several headings to resolve front/back) biases that choice toward the sound. Only the camera confirms the victim.
 
-**Main hardware** (full list, prices and links in `../to_submit/ItemList_AEGIS_Thursday_1.xlsx`; total ₹11,018, reserve ₹3,982):
+**Main hardware** (full list, prices and links in `../to_submit/ItemList_AEGIS_Thursday_1.xlsx`; total ₹11,971, reserve ₹3,029):
 
 - ESP32-S3 DevKitC-1 and ESP32-CAM (OV2640)
 - 4 × N20 gear motors with encoders, 2 × TB6612FNG drivers
@@ -44,6 +44,7 @@ Safety never depends on the link: the edge sensors, distance sensors and watchdo
 - 5 × TCRT5000 table-edge sensors (front-left, front-right, rear, both rear corners) and 1 intake sensor
 - Servo-driven intake door, 3S 18650 pack, 2 × XL4015 5 V regulators
 - Laser-cut acrylic decks and four PLA printed parts
+- Wiring and power distribution: T-connector battery lead, 6.3 A fuse, main power switch, silicone wire (18/22/26 AWG), an ESP32-S3 carrier board on prototype PCB, headers, resistors and heat-shrink
 
 ## 3. Repository layout
 
@@ -148,6 +149,7 @@ Acoustic homing doubles the success rate and more than halves the mission time.
 
 5. Order parts. Measure every board with calipers and correct the footprints in `Build_AEGIS_Rover.py` before laser cutting.
 6. Laser-cut and engrave the decks, print the PLA parts, and wire to `AEGIS_Wiring_Guide.pdf`. Check each board's pin order against its silkscreen.
+   Soldering needed (the lab's irons are enough): header pins on the VL53L0X, INMP441, MPU-6050 and TB6612 modules; the ESP32-S3 carrier board (two 22-pin sockets from the 1x20 strips, the 2.2 k I2C pull-ups, the 100 k / 20 k battery divider); the fuse holder on a board offcut; the T-connector lead, power switch and XL4015 input/output wires. Insulate every power joint with heat-shrink.
 7. Bring up the hardware with the firmware README checklist.
 8. Build the real-hardware side of the edge brain: Wi-Fi bridge on the ESP32 (UDP telemetry, MJPEG camera stream); retrain YOLO on real photos; record real screams into `simulation3d/screams/`.
 9. Retrain the navigation policy in simulation with `simulation3d/rl_reward.py` (penalises falls, tipping and overturning). Adopt it only if it beats the rule-based brain. Tune the edge margin to recover hidden-token success without new falls.
