@@ -65,6 +65,10 @@ items_data = [
     (33, '2.54 mm 1x40 Pin Male Header Strip', 3, 9, 'https://robu.in/product/2-54mm-1x40-pin-male-single-row-straight-short-header-strip-pack-of-3/', 'Headers for the sensor modules and carrier board'),
     (34, 'Metal Film Resistor Assorted Kit, 600 pcs, 30 values', 1, 189, 'https://robu.in/product/30-different-valued-metal-film-resistor-assorted-kit-for-diy-electronic-projects-and-experiments/', '2.2 kOhm I2C pull-ups; 100 kOhm / 20 kOhm battery divider'),
     (35, '127 pcs Heat Shrink Tube Kit', 1, 146, 'https://robu.in/product/127pcs-black-heat-shrinkable-tube-kit-plastic-bag/', 'Insulating soldered joints'),
+    (36, 'Nylon Cable Zip Ties 100 mm (pack of 100)', 1, 30, 'https://robu.in/product/nylon-cable-zip-ties-100mm-100pcs-bag-1-bag/', 'Hold each motor in its printed mount; cable management'),
+    (37, 'Solder Wire 0.8 mm, 50 g', 1, 289, 'https://robu.in/product/solder-wire-0-8mm50g/', 'All header, carrier-board and power-wire soldering'),
+    (38, '3M Double-Sided Acrylic Foam Tape, 12 mm x 10 m', 1, 231, 'https://www.amazon.in/dp/B07WZRSYJM', 'Mounts the ESP32-CAM and sensor boards without screw holes. Not sold on Robu.in'),
+    (39, 'Numakers Silk PLA Filament, Orange, 1.75 mm, 1 kg', 1, 955, 'https://robu.in/product/numakers-silk-pla-filament-175mm-orange-1kg/', 'Victim token and decoys (the detector is trained on an orange token)'),
 ]
 
 for r, (n, name, qty, price, link, remark) in enumerate(items_data, start=2):

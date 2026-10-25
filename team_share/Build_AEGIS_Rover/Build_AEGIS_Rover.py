@@ -203,7 +203,7 @@ def hex_prism(comp, af, h, cx, cy, z0):
                              for i in range(6)], z0, h)
 
 
-def revolve_z(comp, outline):
+def revolve_z(comp, outline, op=NEW):
     """outline: closed list of (radius, z) points; revolved 360 deg about the component Z axis."""
     sk = comp.sketches.add(comp.xZConstructionPlane)
     lines = sk.sketchCurves.sketchLines
@@ -214,7 +214,7 @@ def revolve_z(comp, outline):
         prev = lines.addByTwoPoints(prev.endSketchPoint, p)
     lines.addByTwoPoints(prev.endSketchPoint, first.startSketchPoint)
     rev = comp.features.revolveFeatures
-    inp = rev.createInput(largest_profile(sk), comp.zConstructionAxis, NEW)
+    inp = rev.createInput(largest_profile(sk), comp.zConstructionAxis, op)
     inp.setAngleExtent(False, adsk.core.ValueInput.createByString('360 deg'))
     return rev.add(inp)
 
@@ -567,7 +567,7 @@ def build(out_dir=None, detailed=False):
     holes(c, uz1, P['deck_t'], [(3.2, x, y) for x, y in pillars + mast_bolts])
     slot_cut(c, uz1, P['deck_t'], -30.0, -6.0, 10.0, 6.0, 6.0)
     sw_x, sw_y = P['switch_x'], P['switch_y']                       # rocker switch cutout (19.4 x 13.2)
-    slot_cut(c, uz1, P['deck_t'], sw_x - 9.7, sw_y - 6.6, sw_x + 9.7, sw_y + 6.6, 2.0)
+    slot_cut(c, uz1, P['deck_t'], sw_x - 9.7, sw_y - 6.6, sw_x + 9.7, sw_y + 6.6, 0.5)
     look.paint(c, 'acrylic', ACRYLIC)
     rigid.append(o)
 
@@ -674,6 +674,7 @@ def build(out_dir=None, detailed=False):
     poly_prism(c, [(P['bay_x1'] + 3.0, -bhw), (P['bay_x1'] + 3.0, -bhw - wt), (P['bay_x1'] + 20.0, -bhw - 13.0),
                    (P['bay_x1'] + 20.0, -bhw - 10.0)], fz, wall_h, JOIN)                    # right funnel fin (full height: prints flange-down)
     box(c, 3.0, 12.0, 16.0, P['bay_x0'] + 1.5, 0, 18.0, JOIN)                                # capture-sensor boss
+    box(c, 32.6, 14.6, 2.0, 130.0, -50.0, lz0 - 2.0, CUT)                                    # clearance for the FR cliff sensor
     look.paint(c, 'pla', PLA)
     rigid.append(o)
 
@@ -687,7 +688,7 @@ def build(out_dir=None, detailed=False):
     for i in range(4):                                                                        # outside stiffening ribs
         box(c, 2.0, 2.0, door_h, 2.5, -14.0 - i * 18.0, 0, JOIN)
     holes(c, door_h + 1.5, 4.0, [(5.8, 0, 0)])                                                # spline socket
-    revolve_z(c, [(0.0, door_h - 13.0), (1.5, door_h - 13.0), (6.0, door_h - 8.5), (0.0, door_h - 8.5)])  # 45 deg cone under the hub: prints without support
+    revolve_z(c, [(0.0, door_h - 13.0), (1.5, door_h - 13.0), (6.0, door_h - 8.5), (0.0, door_h - 8.5)], JOIN)  # 45 deg cone under the hub: prints without support
     look.paint(c, 'pla', PLA)
     door_occ = o
     door_pt = origin_point(c)

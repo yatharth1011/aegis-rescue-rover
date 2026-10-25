@@ -35,7 +35,7 @@ Safety never depends on the link: the edge sensors, distance sensors and watchdo
 
 **Search strategy.** The rover always runs a camera coverage search: it keeps a map of which parts of the table it has seen and drives to the viewpoint that reveals the most unseen area per metre travelled. When it hears a scream, the bearing (accumulated over several headings to resolve front/back) biases that choice toward the sound. Only the camera confirms the victim.
 
-**Main hardware** (full list, prices and links in `../to_submit/ItemList_AEGIS_Thursday_1.xlsx`; total ₹11,971, reserve ₹3,029):
+**Main hardware** (full list, prices and links in `../to_submit/ItemList_AEGIS_Thursday_1.xlsx`; total ₹13,476, reserve ₹1,524):
 
 - ESP32-S3 DevKitC-1 and ESP32-CAM (OV2640)
 - 4 × N20 gear motors with encoders, 2 × TB6612FNG drivers

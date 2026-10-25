@@ -2,7 +2,7 @@
 Print-ready 3MF of every PLA part, oriented flat on the bed and laid out for the Creality K1 Max (300 x 300 mm bed).
 
     ~/aegis_venv/bin/python team_share/tools/make_3mf.py
-    -> team_share/print/AEGIS_PLA_parts.3mf (+ one STL per part)
+    -> team_share/print/AEGIS_plate1_*.3mf and AEGIS_plate2_*.3mf (+ one STL per part)
 
 Reads the STLs that Build_AEGIS_Rover exports to Build_AEGIS_Rover/output/. If those were exported
 before the printability fixes (hanger cable-tie channels, mast bolt holes and camera pad, full-height
@@ -35,7 +35,9 @@ def prism(poly_xy, z0, z1):                      # convex polygon in XY, extrude
 
 
 def load(name):
-    return trimesh.load(os.path.join(SRC, "print_%s.stl" % name))
+    m = trimesh.load(os.path.join(SRC, "print_%s.stl" % name))
+    parts = m.split(only_watertight=False)
+    return trimesh.boolean.union(parts) if len(parts) > 1 else m      # Fusion may export overlapping bodies
 
 
 def solid_at(m, p):
@@ -67,6 +69,7 @@ def shroud():
     m = load("Intake_Shroud_PLA")
     if not solid_at(m, (139.5, -38.8, 48.5)):                  # funnel fin stops 3 mm short of the deck
         m = m.union(prism([(131, -32), (131, -35), (148, -45), (148, -42)], 46.9, 50.0))
+    m = m.difference(box((113.7, -57.3, 48.0), (146.3, -42.7, 50.5)))   # clearance for the FR cliff sensor
     m.apply_transform(trimesh.transformations.rotation_matrix(np.pi, (1, 0, 0)))   # flanges on the bed
     return m
 
@@ -109,21 +112,33 @@ def main():
         plates[1 if name.startswith(("Victim", "Decoy")) else 0].append((name, m))
         m.export(os.path.join(OUT, name + ".stl"))
         report.append("%-18s %5.1f x %5.1f x %5.1f mm  %5.1f cm3" % (name, *m.extents, m.volume / 1000))
-    scene = trimesh.Scene()
-    for k, plate in enumerate(plates):
-        x = y = row_h = 0.0
+    # one 3MF per plate (one filament colour each), laid out around the centre of the 300 x 300 bed
+    files = []
+    for k, (plate, tag) in enumerate(zip(plates, ("plate1_black_PLA+_rover_parts", "plate2_orange_PLA_demo_props"))):
+        placed, x, y, row_h = [], 0.0, 0.0, 0.0
         for name, m in sorted(plate, key=lambda t: -t[1].extents[1]):
-            if x + m.extents[0] > 290:
+            if x + m.extents[0] > 280:
                 x, y, row_h = 0.0, y + row_h + 8, 0.0
-            assert y + m.extents[1] <= 290, "plate %d overflow" % (k + 1)
             mm = m.copy()
-            mm.apply_translation((x + k * 320.0, y, 0))      # plates side by side in the file
-            scene.add_geometry(mm, node_name="plate%d_%s" % (k + 1, name), geom_name=name)
+            mm.apply_translation((x, y, 0))
+            placed.append((name, mm))
             x, row_h = x + m.extents[0] + 8, max(row_h, m.extents[1])
-    f = os.path.join(OUT, "AEGIS_PLA_parts.3mf")
-    scene.export(f)
+        lo = np.min([m.bounds[0] for _, m in placed], axis=0)
+        hi = np.max([m.bounds[1] for _, m in placed], axis=0)
+        assert (hi - lo)[:2].max() <= 290, "plate %d does not fit" % (k + 1)
+        shift = (150 - (lo[0] + hi[0]) / 2, 150 - (lo[1] + hi[1]) / 2, 0)
+        scene = trimesh.Scene()
+        for name, mm in placed:
+            mm.apply_translation(shift)
+            scene.add_geometry(mm, node_name=name, geom_name=name)
+        f = os.path.join(OUT, "AEGIS_%s.3mf" % tag)
+        scene.export(f)
+        files.append(f)
+    old = os.path.join(OUT, "AEGIS_PLA_parts.3mf")
+    if os.path.exists(old):
+        os.remove(old)
     print("\n".join(report))
-    print(f)
+    print("\n".join(files))
 
 
 if __name__ == "__main__":
