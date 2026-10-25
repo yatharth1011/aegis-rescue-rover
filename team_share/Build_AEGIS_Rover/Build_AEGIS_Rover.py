@@ -1008,17 +1008,6 @@ def build(out_dir=None, detailed=False):
         shot('render_side.png', V.RightViewOrientation, 0.0)
         shot('render_top.png', V.TopViewOrientation, 60.0)
         shot('render_iso_rear.png', V.IsoTopLeftViewOrientation, 0.0)
-        if detailed:
-            upper = [o2 for o2 in root.occurrences if o2.component.name in
-                     ('Upper_Deck_Acrylic', 'Camera_Mast_PLA', 'ESP32_CAM_OV2640', 'ESP32_S3_DevKitC', 'MPU6050_IMU',
-                      'ESP32_Carrier_Perfboard', 'Power_Switch_Rocker',
-                      'INMP441_Mic_L', 'INMP441_Mic_R', 'VL53L0X_Left', 'VL53L0X_Right')]
-            for o2 in upper:
-                o2.isLightBulbOn = False
-            shot('render_wiring_lower_deck.png', V.IsoTopRightViewOrientation, 0.0)
-            shot('render_wiring_top.png', V.TopViewOrientation, 0.0)
-            for o2 in upper:
-                o2.isLightBulbOn = True
         door_joint.jointMotion.rotationValue = math.radians(60.0)
 
         em = design.exportManager
@@ -1029,6 +1018,17 @@ def build(out_dir=None, detailed=False):
                 em.execute(opt)
             except Exception as e:
                 info['export_error_' + fn] = str(e)
+        if detailed:                        # wiring views last: hiding the upper deck must not reach the exported archive
+            upper = [o2 for o2 in root.occurrences if o2.component.name in
+                     ('Upper_Deck_Acrylic', 'Camera_Mast_PLA', 'ESP32_CAM_OV2640', 'ESP32_S3_DevKitC', 'MPU6050_IMU',
+                      'ESP32_Carrier_Perfboard', 'Power_Switch_Rocker',
+                      'INMP441_Mic_L', 'INMP441_Mic_R', 'VL53L0X_Left', 'VL53L0X_Right')]
+            for o2 in upper:
+                o2.isLightBulbOn = False
+            shot('render_wiring_lower_deck.png', V.IsoTopRightViewOrientation, 0.0)
+            shot('render_wiring_top.png', V.TopViewOrientation, 0.0)
+            for o2 in upper:
+                o2.isLightBulbOn = True
 
         info.update(cut_dxf_notes)          # cut DXFs were written before engraving (cut lines only)
 
