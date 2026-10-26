@@ -10,6 +10,7 @@ Edit the sources (FABRICATION_GUIDE.md, edge/README.md), then run this again. A 
 import base64
 import html
 import os
+import re
 import subprocess
 import tempfile
 
@@ -37,6 +38,9 @@ GUIDES = [
     dict(src=os.path.join(TS, "edge", "README.md"), out=os.path.join(TS, "AEGIS_Deployment_Guide.pdf"),
          title="Deployment guide", sub="Flashing, network, bring-up and the first autonomous mission",
          cover=os.path.join(TS, "Build_AEGIS_Rover", "output_detailed", "render_wiring_lower_deck.png")),
+    dict(src=os.path.join(TS, "HOW_AEGIS_WORKS.md"), out=os.path.join(TS, "AEGIS_How_It_Works.pdf"),
+         title="How A.E.G.I.S. works", sub="The whole system explained in plain language: hearing, seeing, thinking, staying safe",
+         cover=os.path.join(TS, "Build_AEGIS_Rover", "output", "render_iso_door_open.png")),
 ]
 
 CSS = """
@@ -169,10 +173,96 @@ def fig_system(path):
     plt.close(fig)
 
 
+def fig_safety(path):
+    fig, ax = plt.subplots(figsize=(10, 3.4))
+    ax.axis("off")
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 34)
+    steps = [("Laptop command", "v, w, door", "#fff4ec"), ("Wi-Fi watchdog", "no command 0.3 s:\nstop", "#eef3fb"),
+             ("Edge reflex", "edge seen: back off,\nno turning for 1 s", "#eef3fb"), ("Stall escape", "pinned: back off", "#eef3fb"),
+             ("Distance limit", "slower the closer\nan obstacle is", "#eef3fb"), ("Wheels", "PI speed control", "#e8f6ec")]
+    w = 14.2
+    for i, (t, sub, fc) in enumerate(steps):
+        x = 1 + i * (w + 2.3)
+        ax.add_patch(patches.FancyBboxPatch((x, 8), w, 18, boxstyle="round,pad=0.3,rounding_size=1.5", fc=fc, ec=NAVY, lw=1.3))
+        ax.text(x + w / 2, 21.5, t, ha="center", va="center", fontsize=7.8, weight="bold", color=NAVY)
+        ax.text(x + w / 2, 14, sub, ha="center", va="center", fontsize=6.6, color="#2b3550")
+        if i:
+            ax.annotate("", xy=(x - 0.2, 17), xytext=(x - 2.1, 17), arrowprops=dict(arrowstyle="-|>", lw=1.4, color=ORANGE))
+    ax.add_patch(patches.FancyBboxPatch((17.5, 2), 64, 3.2, boxstyle="round,pad=0.3", fc=NAVY, ec=NAVY))
+    ax.text(49.5, 3.6, "runs on the rover, 100 times a second; the laptop cannot switch it off", ha="center", va="center",
+            fontsize=8, color="white")
+    fig.savefig(path, dpi=200, facecolor="white", bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_sound(path):
+    fig, axs = plt.subplots(1, 2, figsize=(10, 3.8), gridspec_kw=dict(width_ratios=[1.1, 1]))
+    ax = axs[0]
+    ax.set_xlim(-6, 6)
+    ax.set_ylim(-1.5, 6.5)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    src = np.array([-3.6, 5.2])
+    mics = {"L": np.array([-0.5, 0]), "R": np.array([0.5, 0])}
+    for k, m in mics.items():
+        ax.plot(*m, "o", ms=11, color=NAVY)
+        ax.text(m[0], -0.9, "mic " + k, ha="center", fontsize=8)
+        ax.plot([src[0], m[0]], [src[1], m[1]], color=ORANGE if k == "L" else "#8a93a3", lw=1.6)
+    ax.plot(*src, "*", ms=18, color="#d62828")
+    ax.text(src[0], src[1] + 0.6, "scream", ha="center", fontsize=8.5, weight="bold")
+    ax.text(0, -1.45, "10 cm apart", ha="center", fontsize=7.5, color="#5b6476")
+    ax.text(-5.8, 2.6, "the left mic hears it a\nfraction of a millisecond\nearlier than the right one", fontsize=8)
+    ax.set_title("1. A small time difference", fontsize=9.5, color=NAVY, weight="bold")
+    ax = axs[1]
+    t = np.linspace(0, 1, 400)
+    sig = np.sin(2 * np.pi * 9 * t) * np.exp(-((t - 0.45) / 0.18) ** 2)
+    ax.plot(t, sig + 1.4, color=ORANGE, lw=1.4)
+    ax.plot(t + 0.08, sig - 0.6, color="#8a93a3", lw=1.4)
+    ax.text(-0.02, 1.4, "left", ha="right", va="center", fontsize=8)
+    ax.text(-0.02, -0.6, "right", ha="right", va="center", fontsize=8)
+    ax.annotate("", xy=(0.53, -1.6), xytext=(0.45, -1.6), arrowprops=dict(arrowstyle="<->", lw=1.2))
+    ax.text(0.49, -2.1, "delay -> angle", ha="center", fontsize=8)
+    ax.set_xlim(-0.12, 1.1)
+    ax.set_ylim(-2.4, 2.6)
+    ax.axis("off")
+    ax.set_title("2. GCC-PHAT finds the delay, maths gives the angle", fontsize=9.5, color=NAVY, weight="bold")
+    fig.tight_layout()
+    fig.savefig(path, dpi=200, facecolor="white", bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_states(path):
+    fig, ax = plt.subplots(figsize=(10, 3.6))
+    ax.axis("off")
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 36)
+    S = [("EXPLORE", "search the table", 8), ("PRE-GRASP", "go 30 cm in front", 25), ("APPROACH", "door open, drive in", 42),
+         ("CLOSE", "door shut, check", 59), ("RETURN", "safe route home", 76), ("DONE", "token home", 92)]
+    for name, sub, x in S:
+        ax.add_patch(patches.FancyBboxPatch((x - 7, 16), 14, 12, boxstyle="round,pad=0.3,rounding_size=2",
+                                            fc="#e8f6ec" if name == "DONE" else "#eef3fb", ec=NAVY, lw=1.3))
+        ax.text(x, 24, name, ha="center", fontsize=8.6, weight="bold", color=NAVY)
+        ax.text(x, 19.4, sub, ha="center", fontsize=6.3, color="#2b3550")
+    for (_, _, a), (_, _, b) in zip(S, S[1:]):
+        ax.annotate("", xy=(b - 7.4, 22), xytext=(a + 7.4, 22), arrowprops=dict(arrowstyle="-|>", lw=1.4, color=ORANGE))
+    lab = ["token seen", "in position", "token in the bay", "still inside", "at the start"]
+    for (_, _, a), (_, _, b), t in zip(S, S[1:], lab):
+        ax.text((a + b) / 2, 29.5, t, ha="center", fontsize=6.8, color="#5b6476")
+    ax.annotate("", xy=(8, 15.6), xytext=(42, 15.6), arrowprops=dict(arrowstyle="-|>", lw=1.2, color="#8a93a3",
+                                                                     connectionstyle="arc3,rad=-0.35"))
+    ax.text(25, 4.5, "missed it: back off, look again", ha="center", fontsize=7.2, color="#5b6476")
+    fig.savefig(path, dpi=200, facecolor="white", bbox_inches="tight")
+    plt.close(fig)
+
+
 FIGS = {
     "decks": (fig_decks, "The two decks as LaserCAD will show them (lasercad_*.dxf)."),
     "plates": (fig_plates, "Print plates as laid out in the two 3MF files."),
     "system": (fig_system, "What runs where, and how the three boards talk."),
+    "safety": (fig_safety, "Every laptop command passes these checks on the rover before the wheels turn."),
+    "sound": (fig_sound, "Two microphones 10 cm apart: the arrival-time difference gives the direction."),
+    "states": (fig_states, "The rescue as a state machine."),
 }
 
 
@@ -192,6 +282,9 @@ def build(g):
             fn(p)
             src = src.replace(marker, '<figure><img src="%s"><figcaption>%s</figcaption></figure>' %
                               (data_uri(p), html.escape(caption)))
+    for m in re.finditer(r"<!-- img:([^|]+)\|(.*?) -->", src):
+        src = src.replace(m.group(0), '<figure><img src="%s"><figcaption>%s</figcaption></figure>' %
+                          (data_uri(os.path.join(TS, m.group(1))), html.escape(m.group(2))))
     body = markdown.markdown(src, extensions=["tables", "fenced_code", "sane_lists"])
     cover = ('<div class="cover"><div class="band"></div><div class="brand">A.E.G.I.S.  MK2</div>'
              '<h1 style="display:block">%s</h1><div class="sub">%s</div><div class="img"><img src="%s"></div>'
