@@ -5,7 +5,8 @@
  *   core 0 : Task_AudioDSP    prio 10  I2S DMA -> band-pass -> GCC-PHAT -> bearing
  *            Task_Vision      prio 8   ESP32-CAM UART reports
  *            Task_Telemetry   prio 3   2 Hz status log (micro-ROS publisher later)
- *            Wi-Fi / lwIP              (when enabled; ESP-IDF pins them to core 0)
+ *            Task_Net         prio 6   Wi-Fi + UDP link to the laptop edge brain
+ *            Wi-Fi / lwIP              (ESP-IDF pins them to core 0)
  */
 #include <inttypes.h>
 
@@ -19,6 +20,9 @@ static const char *TAG = "aegis";
 
 QueueHandle_t q_doa;
 QueueHandle_t q_vision;
+QueueHandle_t q_cmd;
+QueueHandle_t q_listen;
+QueueHandle_t q_clip;
 SemaphoreHandle_t g_telem_mutex;
 telemetry_t g_telem;
 
@@ -51,13 +55,17 @@ void app_main(void)
 {
     q_doa = xQueueCreate(1, sizeof(doa_msg_t));
     q_vision = xQueueCreate(1, sizeof(vision_msg_t));
+    q_cmd = xQueueCreate(1, sizeof(edge_cmd_t));
+    q_listen = xQueueCreate(1, sizeof(listen_req_t));
+    q_clip = xQueueCreate(1, sizeof(audio_clip_t *));
     g_telem_mutex = xSemaphoreCreateMutex();
-    configASSERT(q_doa && q_vision && g_telem_mutex);
+    configASSERT(q_doa && q_vision && q_cmd && q_listen && q_clip && g_telem_mutex);
 
     BaseType_t ok = pdPASS;
     ok &= xTaskCreatePinnedToCore(task_nav_control, "nav", 6144, NULL, PRIO_NAV, NULL, CORE_NAV);
     ok &= xTaskCreatePinnedToCore(task_audio_dsp, "audio", 4096, NULL, PRIO_AUDIO, NULL, CORE_AUDIO);
     ok &= xTaskCreatePinnedToCore(task_vision_link, "vision", 3072, NULL, PRIO_VISION, NULL, CORE_AUX);
+    ok &= xTaskCreatePinnedToCore(task_net, "net", 6144, NULL, PRIO_NET, NULL, CORE_AUX);
     ok &= xTaskCreatePinnedToCore(task_telemetry, "telem", 3072, NULL, PRIO_TELEMETRY, NULL, CORE_AUX);
     configASSERT(ok == pdPASS);
     ESP_LOGI(TAG, "tasks started");

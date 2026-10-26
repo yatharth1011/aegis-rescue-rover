@@ -2,6 +2,8 @@
  * Host unit tests for components/aegis_core.  Run:  make -C test/host
  */
 #include "aegis_control.h"
+#include "aegis_reflex.h"
+#include "aegis_params.h"
 #include "aegis_dsp.h"
 #include "aegis_policy.h"
 
@@ -292,6 +294,43 @@ static void test_path(void)
     CHECK(v == 0 && fabsf(w) == 2.0f, "target behind: turn in place");
 }
 
+static void test_reflex(void)
+{
+    printf("reflex\n");
+    const reflex_cfg_t cfg = {REFLEX_DIST_M, REFLEX_V_MPS, REFLEX_NO_TURN_S, ESC_DIST_M, ESC_V_MPS};
+    reflex_t r;
+    reflex_init(&r, &cfg);
+    const float dt = 0.01f;
+    reflex_out_t o = reflex_step(&r, 0.2f, 0.5f, 0, false, dt);
+    CHECK(!o.active && o.v == 0.2f && o.w == 0.5f, "no edge: command passes through");
+
+    o = reflex_step(&r, 0.2f, 0.5f, CLIFF_FL, false, dt);
+    CHECK(o.active && o.v < 0 && o.w == 0, "front edge: back off straight (v %.2f w %.2f)", o.v, o.w);
+    float travelled = REFLEX_V_MPS * dt;
+    int ticks = 1;
+    while (r.backoff_m > 0 && ticks < 1000) {
+        o = reflex_step(&r, 0.2f, 0.5f, 0, false, dt);
+        travelled += -o.v * dt;
+        ticks++;
+    }
+    CHECK(fabsf(travelled - REFLEX_DIST_M) < 0.002f, "backs off %.3f m (expect %.2f)", travelled, REFLEX_DIST_M);
+    o = reflex_step(&r, 0.2f, 0.5f, 0, false, dt);
+    CHECK(o.v == 0 && o.w == 0, "inside the no-turn window: no turn, no move toward the edge");
+    o = reflex_step(&r, -0.1f, 0.0f, 0, false, dt);
+    CHECK(o.v == -0.1f, "moving away from the edge is allowed");
+    for (int i = 0; i < 120; i++) o = reflex_step(&r, 0.2f, 0.5f, 0, false, dt);
+    CHECK(!o.active && o.v == 0.2f && o.w == 0.5f, "after %.1f s the brain is back in control", REFLEX_NO_TURN_S);
+
+    reflex_init(&r, &cfg);
+    o = reflex_step(&r, -0.2f, 1.0f, CLIFF_RL, false, dt);
+    CHECK(o.v > 0 && o.w == 0, "rear-corner edge: drive forward straight");
+    reflex_init(&r, &cfg);
+    o = reflex_step(&r, 0.2f, 0.0f, 0, true, dt);
+    CHECK(o.v < 0 && r.stall_events == 1, "stall: escape backwards");
+    o = reflex_step(&r, 0.2f, 0.0f, 0, true, dt);
+    CHECK(r.stall_events == 1, "one escape per stall, not per tick");
+}
+
 int main(void)
 {
     test_bandpass();
@@ -302,6 +341,7 @@ int main(void)
     test_cbf();
     test_policy();
     test_path();
+    test_reflex();
     printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail ? 1 : 0;
 }

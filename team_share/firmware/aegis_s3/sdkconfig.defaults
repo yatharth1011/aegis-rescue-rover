@@ -11,3 +11,7 @@ CONFIG_ESP_TASK_WDT_PANIC=y
 # Brown-out: servo stall on a sagging pack must reset cleanly, not corrupt state
 CONFIG_ESP_BROWNOUT_DET=y
 CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7=y
+
+# Wi-Fi link: the image needs more than the default 1 MB app partition
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y

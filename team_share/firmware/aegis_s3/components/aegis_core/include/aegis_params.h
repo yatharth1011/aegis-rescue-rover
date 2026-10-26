@@ -9,10 +9,11 @@
 #define GEAR_RATIO          150.0f
 #define ENC_COUNTS_PER_WHEEL_REV (ENC_PPR * 4 * GEAR_RATIO)   /* x4 quadrature = 1800 */
 
-/* ---- Gripper servo (MG946R on the 5.0 V servo rail) --------------------- */
-#define SERVO_US_OPEN       1900     /* calibrate on the assembled gripper */
-#define SERVO_US_GRIP       1250     /* contact angle for the nominal target; do not
-                                      * command past contact (stall, see calcs s.4) */
+/* ---- Intake-door servo (MG946R on the 5.0 V servo rail, Mk2) ------------- */
+#define SERVO_US_DOOR_OPEN   1950    /* door swung 110 deg clear of the bay mouth: calibrate */
+#define SERVO_US_DOOR_CLOSED 1050    /* door across the bay mouth: calibrate, stop short of the wall */
+#define SERVO_US_OPEN       SERVO_US_DOOR_OPEN     /* names used by the stand-alone mission */
+#define SERVO_US_GRIP       SERVO_US_DOOR_CLOSED
 #define SERVO_US_MIN        900
 #define SERVO_US_MAX        2100
 
@@ -37,11 +38,23 @@
 #define NAV_PERIOD_MS       10       /* 100 Hz */
 #define PI_KP               0.02f
 #define PI_KI               0.40f
-#define CBF_D_SAFE_M        0.15f    /* front ToF sits 92 mm behind the jaw tips (x 83.5 vs
-                                      * 175 mm): 0.15 leaves ~6 cm at the tips. 0.10 left
-                                      * 8 mm and the SIL sim showed frequent jaw contact. */
+#define CBF_D_SAFE_M        0.06f    /* Mk2: front ToF sits 13 mm behind the funnel tip (as in
+                                      * simulation3d/robot.py). Mk1 with jaws needed 0.15. */
 #define CBF_ALPHA           2.0f
 #define ODOM_GYRO_WEIGHT    0.95f
+
+/* ---- Reflexes (aegis_reflex.h), same values as simulation3d/robot.py ------ */
+#define REFLEX_DIST_M        0.06f   /* travel away from a table edge */
+#define REFLEX_V_MPS         0.08f
+#define REFLEX_NO_TURN_S     1.0f    /* no turning / no motion toward the edge afterwards */
+#define ESC_DIST_M           0.06f   /* stall escape, reverse */
+#define ESC_V_MPS            0.06f
+#define LINK_WATCHDOG_MS     300     /* edge mode: no command this long -> stop */
+
+/* ---- IR sensors on the PCF8574 (P0 FL, P1 FR, P2 rear, P3 RL, P4 RR, P5 bay) */
+#define PCF8574_ADDR         0x20    /* PCF8574T, A0-A2 low (0x38 on a PCF8574AT) */
+#define CLIFF_ACTIVE_HIGH    1       /* TCRT5000 module DO goes high with no surface below */
+#define CAPTURE_ACTIVE_LOW   1       /* obstacle module DO goes low with the token in the bay */
 
 /* ---- Policy / primitives ------------------------------------------------ */
 #define POLICY_BLOCK_FRONT_M 0.30f   /* "next cell occupied" = one rover length */
@@ -87,4 +100,5 @@
 #define PRIO_NAV            20
 #define PRIO_AUDIO          10
 #define PRIO_VISION         8
+#define PRIO_NET            6
 #define PRIO_TELEMETRY      3

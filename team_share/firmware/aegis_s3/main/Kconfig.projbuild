@@ -1,0 +1,22 @@
+menu "A.E.G.I.S. link"
+
+    config AEGIS_WIFI_SSID
+        string "Wi-Fi network name (SSID)"
+        default "AEGIS"
+        help
+            Network shared by the rover, the ESP32-CAM and the laptop. A phone
+            hotspot works and keeps the lab Wi-Fi out of the loop.
+
+    config AEGIS_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default "aegis1234"
+
+    config AEGIS_UDP_PORT
+        int "Rover UDP port (commands in)"
+        default 4210
+
+    config AEGIS_LAPTOP_PORT
+        int "Laptop UDP port (telemetry, audio, discovery out)"
+        default 4211
+
+endmenu

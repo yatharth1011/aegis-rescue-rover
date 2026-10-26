@@ -7,7 +7,10 @@
 | `Task_NavControl` | **1** (alone) | 20 | 100 Hz, `xTaskDelayUntil` | Encoders (PCNT), IMU, 3×ToF (non-blocking), odometry, mission FSM, Q-table policy, CBF safety filter, 4× wheel PI → MCPWM, servo, battery |
 | `Task_AudioDSP` | 0 | 10 | 47 frames/s | I2S DMA 48 kHz stereo → 4th-order Butterworth 300–3400 Hz → band-limited GCC-PHAT → bearing |
 | `Task_Vision` | 0 | 8 | per camera frame | UART1 line protocol from the ESP32-CAM (checksummed) |
-| `Task_Telemetry` | 0 | 3 | 2 Hz | Status line; later the micro-ROS publisher |
+| `Task_Net` | 0 | 6 | 20 Hz | Wi-Fi station + UDP link to the laptop edge brain: commands in, telemetry and audio clips out (`task_net.c`, protocol in `edge/README.md`) |
+| `Task_Telemetry` | 0 | 3 | 2 Hz | Status line on the USB console |
+
+**Two modes.** *Edge* (normal): the laptop sends (v, w, door) at 20 Hz; a command older than 300 ms stops the rover. *Standalone* (no laptop has connected): the on-board mission below, started with the BOOT button. The table-edge reflex, stall escape and CBF limit run in the nav task in both modes.
 
 The hand-off note asked for audio on core 0 and navigation on core 1, and that is the layout here. It works because:
 
@@ -26,14 +29,17 @@ The hand-off note asked for audio on core 0 and navigation on core 1, and that i
 
 ## Safety
 
-- **CBF on forward speed:** `v ≤ α·(d_front − d_safe)` with α = 2 s⁻¹ and d_safe = 0.15 m, measured from the front ToF. The jaw tips are 92 mm ahead of the sensor, so this leaves about 6 cm at the tips. A missing or stale front reading (> 150 ms) blocks forward motion.
-- **Stall escape:** two or more wheels near full duty but barely turning for 0.6 s means the rover is pinned on something the front sensor can't see. It backs off 8 cm, then turns 40° toward the freer side.
+- **Table-edge reflex** (`aegis_reflex.c`, same rules as the 3D simulation): five TCRT5000 sensors on the PCF8574. A front sensor over the edge backs the rover off 6 cm, a rear one drives it forward 6 cm; for 1 s afterwards it may not turn or move toward that edge. The laptop cannot override it. If the PCF8574 stops answering, the motors stop (fault `IR`).
+- **Link watchdog:** in edge mode, no command for 300 ms stops the rover.
+- **CBF on forward speed:** `v ≤ α·(d_front − d_safe)` with α = 2 s⁻¹ and d_safe = 0.06 m (Mk2: the front ToF sits 13 mm behind the funnel tip). A missing or stale front reading (> 150 ms) blocks forward motion.
+- **Stall escape:** two or more wheels near full duty but barely turning for 0.6 s means the rover is pinned on something the front sensor can't see. It backs off 6 cm.
 - **No autonomous reversing.** The rover has no rear sensor, so the policy's REVERSE action is replaced by a turn. Commanded reverse speed is capped at 0.10 m/s.
 - **Latched faults stop the motors** (TB6612 STBY low) and need a reset:
   - tilt over 60°
   - IMU failure
   - front ToF missing
   - battery below 9.9 V
+  - PCF8574 (edge sensors) not answering
 - **Low battery:** below 10.2 V the rover abandons SEARCH and drives home.
 - **Boot safety:** STBY sits on GPIO46, which has a strap pull-down, so the motors are off from power-on until firmware enables them.
 - **Watchdog:** the nav task subscribes to the task watchdog (1 s, panic). A hung control loop resets the chip.
@@ -115,20 +121,26 @@ idf.py -p /dev/cu.usbmodem* flash monitor
 
 | Part | Status |
 |---|---|
-| `components/aegis_core` (DSP, PI, kinematics, odometry, CBF, policy, return path) | Built with `-Wall -Wextra -Werror` and **32/32 host tests pass** |
+| `components/aegis_core` (DSP, PI, kinematics, odometry, CBF, policy, return path, edge reflex) | Built with `-Wall -Wextra -Werror` and **41/41 host tests pass** |
 | Closed-loop behaviour | SIL simulator, `sim/`: the core runs in 200 random rooms per scenario. **76 % of nominal missions succeed.** See `sim/README.md` |
-| Full firmware (`main/` + core) | `idf.py build` with **ESP-IDF v5.3.2**, target esp32s3: **builds with zero warnings in project code**. The image is 0x58520 bytes (354 KB), leaving 65 % of the 1 MB app partition free. Not yet run on hardware. |
+| Full firmware (`main/` + core, with Wi-Fi) | `idf.py build` with **ESP-IDF v5.3.2**, target esp32s3: **builds with zero warnings in project code**. The image is 861 KB in the 1.5 MB single-app partition (43 % free). Not yet run on hardware. |
+| Camera firmware (`../aegis_cam/`) | Builds for the ESP32 with the `espressif/esp32-camera` component (950 KB, 37 % free). Not yet run on hardware. |
+| Laptop side against this protocol | `edge/fake_rover.py` speaks the same protocol, driven by the simulator; `edge/test_end_to_end.py` runs whole missions through the real laptop program |
 
 ## Bring-up checklist
 
+Use `edge/bringup.py` (live sensor view, keyboard driving); `edge/README.md` has the full first-run procedure.
+
 1. **Encoders and motors.** Lift the wheels and run with `V_MAX_MPS` low. Check that each `wheel_w` in the telemetry is positive when moving forward. If one isn't, flip that wheel in `MOTOR_INVERT`.
-2. **Servo.** Calibrate `SERVO_US_OPEN` and `SERVO_US_GRIP` on the assembled gripper. GRIP must be the contact angle for the target object, not past it.
-3. **Turn calibration.** Do a 10-turn spin test. Set `TRACK_SKID_GAIN` so that encoder yaw matches gyro yaw.
-4. **Audio.** Play a 1 kHz tone from 1 m at ±45°. The telemetry bearing should read ±45° within about 5°. One sample of lag is 4.1° at broadside.
-5. **CBF.** Drive at a wall. The rover must stop with ≥ 10 cm clearance. The ToF sits on the upper deck, 63 mm above the ground, so **objects lower than that are not seen**. Test with tall obstacles only.
+2. **Door servo.** Calibrate `SERVO_US_DOOR_OPEN` and `SERVO_US_DOOR_CLOSED` on the assembled bay: open clears the bay mouth, closed stops just short of the wall.
+3. **IR sensors.** Check each edge sensor reads EDGE only when it is over the edge (`CLIFF_ACTIVE_HIGH`), and the bay sensor only with the token inside (`CAPTURE_ACTIVE_LOW`).
+4. **Turn calibration.** Do a 10-turn spin test. Set `TRACK_SKID_GAIN` so that encoder yaw matches gyro yaw.
+5. **Audio.** Play a 1 kHz tone from 1 m at ±45°. The telemetry bearing should read ±45° within about 5°. One sample of lag is 4.1° at broadside.
+6. **CBF.** Drive at a wall. The rover must stop with about 6 cm clearance at the funnel tip. The ToF sits on the upper deck, 63 mm above the ground, so **objects lower than that are not seen**. Test with tall obstacles only.
 
 ## Not done yet
 
-- micro-ROS client (`/scan`, `/odom`, `/audio_doa`, `/cmd_vel`). It would replace `Task_Telemetry` on core 0.
-- ESP32-CAM firmware producing the `$T,...` line protocol (`task_vision.c` documents it).
+- Running on hardware: every value marked "calibrate" in `aegis_params.h`.
+- Standalone mode has no camera input: the ESP32-CAM streams to the laptop and no longer sends the `$T,...` UART reports `task_vision.c` reads. Standalone can use sound only; the full mission needs the laptop.
+- micro-ROS (not needed: the UDP link covers the laptop side).
 - Retraining the policy on randomised maps.

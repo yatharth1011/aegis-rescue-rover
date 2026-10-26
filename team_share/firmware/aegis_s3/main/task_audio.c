@@ -8,6 +8,11 @@
  * 48 kHz rather than 44.1 kHz: with a 100 mm baseline the maximum delay is
  * 14 samples instead of 13, which improves angular resolution at no cost.
  *
+ * On a "listen" request from the laptop (q_listen) it also records up to
+ * CLIP_MAX_S of 16 kHz mono (mean of both mics, 3:1 decimation of the raw
+ * signal) plus every valid bearing in that window, and hands the clip to the
+ * net task (q_clip). The laptop runs the scream classifier on it.
+ *
  * Limitation: two microphones cannot tell front from back. A source behind
  * the rover reads as its mirror image in front. The nav task stores bearings
  * in the world frame, so after a turn the estimate is corrected.
@@ -32,6 +37,28 @@ static int32_t s_raw[AUDIO_FRAME * 2];         /* interleaved L, R */
 static float s_l[AUDIO_FRAME], s_r[AUDIO_FRAME];
 static gcc_phat_t s_gcc;
 static bandpass_t s_bp_l, s_bp_r;
+static int16_t s_pcm[CLIP_MAX_N];
+static audio_clip_t s_clip = {.pcm = s_pcm};
+
+typedef struct {
+    bool active;
+    int target;            /* samples to record at 16 kHz */
+    float acc;
+    int acc_n;
+} recorder_t;
+
+static void recorder_feed(recorder_t *r, const float *l, const float *rr, int n)
+{
+    for (int i = 0; i < n && s_clip.n < r->target; i++) {
+        r->acc += 0.5f * (l[i] + rr[i]);
+        if (++r->acc_n == AUDIO_FS / CLIP_FS) {          /* 48 k -> 16 k: mean of 3 */
+            float x = r->acc / r->acc_n * 32767.0f;
+            s_pcm[s_clip.n++] = (int16_t)fmaxf(-32768.0f, fminf(32767.0f, x));
+            r->acc = 0;
+            r->acc_n = 0;
+        }
+    }
+}
 
 static esp_err_t i2s_init(i2s_chan_handle_t *rx)
 {
@@ -78,6 +105,7 @@ void task_audio_dsp(void *arg)
     ESP_LOGI(TAG, "I2S %d Hz, frame %d, lag window +-%d", AUDIO_FS, AUDIO_FRAME, s_gcc.max_lag);
 
     noise_floor_t nf = {.floor = -1.0f};
+    recorder_t rec = {0};
     uint32_t frames = 0;
     int64_t dsp_us_max = 0;
 
@@ -95,6 +123,13 @@ void task_audio_dsp(void *arg)
             s_l[i] = (float)(s_raw[2 * i] >> 8) * scale;
             s_r[i] = (float)(s_raw[2 * i + 1] >> 8) * scale;
         }
+        listen_req_t req;
+        if (!rec.active && s_clip.n == 0 && xQueueReceive(q_listen, &req, 0) == pdTRUE) {
+            rec = (recorder_t){.active = true, .target = (int)(fminf(req.dur_s, CLIP_MAX_S) * CLIP_FS)};
+            s_clip.n_doa = 0;
+        }
+        if (rec.active) recorder_feed(&rec, s_l, s_r, AUDIO_FRAME);   /* raw signal, before the band-pass */
+
         bandpass_process(&s_bp_l, s_l, AUDIO_FRAME);
         bandpass_process(&s_bp_r, s_r, AUDIO_FRAME);
 
@@ -111,6 +146,21 @@ void task_audio_dsp(void *arg)
             .valid = doa_gate(g.psr, band_db, AUDIO_PSR_GATE, AUDIO_SNR_GATE_DB),
         };
         xQueueOverwrite(q_doa, &m);
+        if (rec.active) {
+            if (m.valid && s_clip.n_doa < CLIP_MAX_DOA) s_clip.doa_rad[s_clip.n_doa++] = m.bearing_rad;
+            if (s_clip.n >= rec.target) {
+                s_clip.t_end_us = m.t_us;
+                if (xSemaphoreTake(g_telem_mutex, pdMS_TO_TICKS(5)) == pdTRUE) {
+                    s_clip.est[0] = g_telem.x;
+                    s_clip.est[1] = g_telem.y;
+                    s_clip.est[2] = g_telem.theta;
+                    xSemaphoreGive(g_telem_mutex);
+                }
+                audio_clip_t *p = &s_clip;
+                xQueueOverwrite(q_clip, &p);
+                rec.active = false;
+            }
+        }
 
         int64_t dt = esp_timer_get_time() - t0;
         if (dt > dsp_us_max) dsp_us_max = dt;

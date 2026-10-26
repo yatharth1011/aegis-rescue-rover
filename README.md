@@ -11,9 +11,10 @@ The rover **hears** a distress call, **searches** a table-top arena, **recognise
 | [`team_share/`](team_share) | Everything the team works from. **[`FABRICATION_GUIDE.md`](team_share/FABRICATION_GUIDE.md)**: what to cut or print from which material. **Read [`team_share/README.md`](team_share/README.md)** for the full log, results and to-do list |
 | [`course_templates/`](course_templates) | Blank templates as issued by the course |
 
-**Status:**
-- Mk2 is designed in Autodesk Fusion (41 parts, zero clashes, with a wiring harness and engraved placement marks).
-- The ESP32-S3 firmware builds, and its core passes 32/32 unit tests.
+**Status:** proposal **approved**; now building.
+- Mk2 is designed in Autodesk Fusion (46 parts, zero clashes, with a wiring harness and engraved placement marks).
+- All code to run the real rover is written: ESP32-S3 firmware (with Wi-Fi link and the on-robot table-edge reflex), ESP32-CAM firmware, and the laptop edge brain. Both firmwares build; the core passes 41/41 unit tests; the laptop program has been run end to end against a simulator-driven stand-in for the rover. Nothing has run on hardware yet.
+- Build and deploy, in order: `FABRICATION_GUIDE.md`, `AEGIS_Assembly_Guide.pdf`, `AEGIS_Wiring_Guide.pdf`, `edge/README.md` (all also in `FINAL/4_guides/`).
 - In a 3D simulation (MuJoCo, a YOLO detector trained on the Mac GPU, room acoustics, lossy Wi-Fi), the full mission succeeds in **70%** of hidden-victim runs and **72%** of scream-homing runs, with 1 fall off the table in 120 missions.
 
 Reproduce the results with `team_share/simulation3d/README.md`, then rebuild the submission files:

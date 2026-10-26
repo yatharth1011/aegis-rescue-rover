@@ -11,3 +11,11 @@ __pycache__/
 *.pyc
 .DS_Store
 ~$*
+team_share/firmware/aegis_cam/build/
+team_share/firmware/aegis_cam/sdkconfig
+team_share/firmware/aegis_cam/sdkconfig.old
+team_share/firmware/aegis_cam/managed_components/
+team_share/edge/logs/
+team_share/edge/dataset/
+team_share/edge/camera_calib.npz
+MUJOCO_LOG.TXT
