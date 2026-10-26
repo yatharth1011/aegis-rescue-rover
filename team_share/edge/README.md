@@ -8,6 +8,8 @@ Three programs make the system:
 | ESP32-CAM | Camera stream (MJPEG, 320 x 240, ~10 fps) | `firmware/aegis_cam/` |
 | Laptop | Edge brain: detector, mapping, search, rescue, return home (the same `brain.py` the 3D simulation used) | `edge/aegis_edge.py` |
 
+<!-- fig:system -->
+
 Safety never depends on Wi-Fi: if the laptop stops sending commands for 300 ms, the rover stops. The edge reflex and the front-distance limit run on the rover in every mode.
 
 All commands below run from the `project` folder.

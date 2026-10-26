@@ -543,7 +543,7 @@ def build(out_dir=None, detailed=False):
     pillars = [(-100.0, 52.0), (-100.0, -52.0), (85.0, 52.0), (85.0, -52.0)]
     hanger_bolts = [(ax + sx, sy * 34.0) for ax in axles for sx in (-6.5, 6.5) for sy in (1, -1)]
     shroud_bolts = [(x, sy * 38.5) for x in (55.0, 85.0) for sy in (1, -1)]
-    mast_bolts = [(64.0, sy * 11.0) for sy in (1, -1)]               # M3 x 10 up through the upper deck, nut on the mast base
+    mast_bolts = [(64.0, sy * 11.0) for sy in (1, -1)]               # M3 x 6 up through the upper deck into the mast base
     rigid = []
 
     # --- lower deck -----------------------------------------------------------------
@@ -669,7 +669,7 @@ def build(out_dir=None, detailed=False):
     box(c, wt, 2 * (bhw + wt), wall_h, P['bay_x0'] - wt / 2, 0, fz, JOIN)
     for sy in (1, -1):                                   # flanges stop short of the servo (x < 96)
         box(c, 56.0, 9.0, 3.0, 68.0, sy * (bhw + wt + 4.5), lz0 - 3.0, JOIN)
-    holes(c, lz0, 3.0, [(3.2, x, y) for x, y in shroud_bolts])
+    holes(c, lz0, 3.0, [(2.5, x, y) for x, y in shroud_bolts])          # pilot: M3 x 6 down through the deck cuts its thread
     box(c, 3.0, wt, lz0 - 3.0 - (P['door_top'] + 1.0), P['bay_x1'] + 1.5, -bhw - wt / 2, P['door_top'] + 1.0, JOIN)  # fin bridge above the door
     poly_prism(c, [(P['bay_x1'] + 3.0, -bhw), (P['bay_x1'] + 3.0, -bhw - wt), (P['bay_x1'] + 20.0, -bhw - 13.0),
                    (P['bay_x1'] + 20.0, -bhw - 10.0)], fz, wall_h, JOIN)                    # right funnel fin (full height: prints flange-down)
@@ -811,7 +811,7 @@ def build(out_dir=None, detailed=False):
     box(c, 6.0, 34.0, 56.0, -6.0, 0, 3.0, JOIN)
     # camera pad: its sloped face is parallel to the ESP32-CAM back, 2 mm behind it (foam tape)
     prism_xz(c, [(-3.5, 38.4), (8.89, 59.0), (-3.5, 59.0)], 34.0, JOIN)
-    holes(c, 3.0, 3.0, [(3.2, x - 60.0, y) for x, y in mast_bolts])
+    holes(c, 3.0, 3.0, [(2.5, x - 60.0, y) for x, y in mast_bolts])     # pilot: M3 x 6 up through the deck
     look.paint(c, 'pla', PLA)
     rigid.append(o)
     cam = new_comp(root, 'ESP32_CAM_OV2640', mat(66.0, 0, uz1 + 50.0, [(90.0 + P['cam_tilt_deg'], 'y')]))

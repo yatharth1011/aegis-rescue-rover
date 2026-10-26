@@ -24,9 +24,9 @@ FILES = {
                             ("lasercad_lower_deck.dxf", "lasercad_upper_deck.dxf", "lasercad_lower_deck_underside.dxf")],
     "3_3d_print_K1_Max": [os.path.join(TS, "print", f) for f in
                           ("AEGIS_plate1_black_PLA+_rover_parts.3mf", "AEGIS_plate2_orange_PLA_demo_props.3mf")],
-    "4_guides": [os.path.join(TS, f) for f in ("FABRICATION_GUIDE.md", "AEGIS_Assembly_Guide.pdf", "AEGIS_Wiring_Guide.pdf",
-                                                "AEGIS_Proposal_Deck.pdf")] +
-                [(os.path.join(TS, "edge", "README.md"), "DEPLOYMENT_GUIDE.md"), os.path.join(TS, "edge", "AEGIS_start_pad.pdf")],
+    "4_guides": [os.path.join(TS, f) for f in ("AEGIS_Fabrication_Guide.pdf", "AEGIS_Assembly_Guide.pdf", "AEGIS_Wiring_Guide.pdf",
+                                                "AEGIS_Deployment_Guide.pdf", "AEGIS_Proposal_Deck.pdf")] +
+                [os.path.join(TS, "edge", "AEGIS_start_pad.pdf")],
     "5_cad_model": [os.path.join(B, "output", "AEGIS_Rover.f3d"), os.path.join(B, "output", "AEGIS_Rover.step"),
                     DETAILED_F3D,
                     os.path.join(B, "output", "render_iso_door_open.png"),
@@ -43,11 +43,11 @@ after changing anything; edit the sources in `to_submit/` and `team_share/`, nev
 | `1_submission/` | Project idea deck, item list, approval form | Upload to the course Google Form |
 | `2_laser_cut_acrylic/` | Lower and upper deck DXFs (red = cut, blue = engrave); underside file | LaserCAD on the 3 mm acrylic sheet. Print the underside file on paper at 100 % as the cliff-sensor template |
 | `3_3d_print_K1_Max/` | Plate 1 (black PLA+), plate 2 (orange PLA) | Creality Print on the K1 Max |
-| `4_guides/` | Fabrication, assembly and wiring guides; deployment guide (`DEPLOYMENT_GUIDE.md`); start pad to print; deck as PDF | Order of use: fabrication, assembly, wiring, then deployment |
+| `4_guides/` | Fabrication, assembly, wiring and deployment guides (PDF); start pad to print; deck as PDF | Use in that order: fabrication, assembly (wiring at its steps 16 and 24), then deployment |
 | `5_cad_model/` | Fusion archives (printable and detailed), STEP, two renders | Open the `.f3d` in Fusion; STEP for other CAD tools |
 
 Code: rover firmware `team_share/firmware/aegis_s3/`, camera firmware `team_share/firmware/aegis_cam/`,
-laptop edge brain `team_share/edge/` (deployment steps in `4_guides/DEPLOYMENT_GUIDE.md`).
+laptop edge brain `team_share/edge/` (deployment steps in `4_guides/AEGIS_Deployment_Guide.pdf`).
 Simulation: `team_share/simulation3d/`.
 """
 

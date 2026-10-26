@@ -44,6 +44,13 @@ def solid_at(m, p):
     return bool(m.contains([p])[0])
 
 
+def pilot(m, xy, z0, z1, d=2.5):
+    """Plug whatever hole is at each xy and drill a d mm pilot through z0..z1 (self-tapping M3)."""
+    plugs = [cyl(3.4, z0 + 0.01, z1 - 0.01, x, y) for x, y in xy]
+    m = m.union(trimesh.util.concatenate(plugs))
+    return m.difference(trimesh.util.concatenate([cyl(d, z0 - 1, z1 + 1, x, y, 32) for x, y in xy]))
+
+
 def hanger():
     m = load("Motor_Hanger_PLA")
     if solid_at(m, (0, 8.0, 29.5)):                            # cable-tie channels missing
@@ -60,8 +67,7 @@ def mast():
         pad = trimesh.convex.convex_hull(np.array([(x, y, z) for x, z in ((-3.5, 38.4), (8.89, 59.0), (-3.5, 59.0))
                                                    for y in (-17.0, 17.0)]))
         m = m.union(pad)
-    if solid_at(m, (4.0, 11.0, 1.5)):                          # bolt holes missing
-        m = m.difference(trimesh.util.concatenate([cyl(3.2, -1, 4, 4.0, s * 11.0) for s in (1, -1)]))
+    m = pilot(m, [(4.0, s * 11.0) for s in (1, -1)], 0.0, 3.0)  # 2.5 mm pilots for M3 x 6 from below
     return m                                                   # base already on the bed
 
 
@@ -70,6 +76,7 @@ def shroud():
     if not solid_at(m, (139.5, -38.8, 48.5)):                  # funnel fin stops 3 mm short of the deck
         m = m.union(prism([(131, -32), (131, -35), (148, -45), (148, -42)], 46.9, 50.0))
     m = m.difference(box((113.7, -57.3, 48.0), (146.3, -42.7, 50.5)))   # clearance for the FR cliff sensor
+    m = pilot(m, [(x, s * 38.5) for x in (55.0, 85.0) for s in (1, -1)], 47.0, 50.0)   # flange pilots for M3 x 6
     m.apply_transform(trimesh.transformations.rotation_matrix(np.pi, (1, 0, 0)))   # flanges on the bed
     return m
 

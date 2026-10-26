@@ -29,6 +29,8 @@ Nothing else is cut or printed: wheels, motors, spacers, screws and every electr
 
 ## 2. Acrylic decks (laser cutter, LaserCAD)
 
+<!-- fig:decks -->
+
 Material: one NEILL 12 x 12 inch (about 305 x 305 mm) clear acrylic sheet, 3 mm (#16). Both decks fit on it.
 
 1. Peel the protective film only after cutting (it stops burn marks), unless the lab says otherwise.
@@ -42,6 +44,8 @@ Material: one NEILL 12 x 12 inch (about 305 x 305 mm) clear acrylic sheet, 3 mm 
 6. Do **not** laser the underside file. Print `lasercad_lower_deck_underside.dxf` on paper at 100 % (check a dimension with a ruler) and use it as a template for the five cliff sensors under the lower deck.
 
 ## 3. 3D-printed parts (Creality K1 Max, Creality Print)
+
+<!-- fig:plates -->
 
 | Plate | Filament | Parts |
 |---|---|---|
