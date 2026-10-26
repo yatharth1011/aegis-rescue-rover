@@ -64,7 +64,7 @@ We calculated the worst case: all four motors stalled plus the servo pushing, ab
 
 **Knowing where it is.** There is no GPS indoors. The rover works out its position by **odometry**: adding up how far the wheels have turned (for distance) and what the **gyro** says (for turning). It is like walking with your eyes closed and counting steps: very good over short distances, but small errors pile up. Two things correct that drift:
 
-- the **table edges**: when an edge sensor sees the edge, the rover knows exactly how far it is from that edge;
+- the **table edges**: nobody has to measure the table. The first time an edge sensor finds an edge, the laptop marks that edge on its map as a wall (it assumes the edges run straight, along or across the rover's starting direction). Each later time a sensor sees the same edge, the rover knows exactly how far it is from it and corrects its position;
 - the **start pad**: a printed square pattern (an **ArUco marker**) at the starting point. When the camera sees it, the laptop can calculate the rover's exact position and heading from the marker's shape in the picture, to about 1-2 cm.
 
 ## 6. Staying safe: reflexes that cannot be overruled
@@ -114,7 +114,7 @@ The laptop divides the table into a grid of 2 cm squares and keeps two maps:
 
 **Choosing where to go.** The laptop considers many possible viewpoints and picks the one that would show the most unseen table per metre of driving. In demo 2, viewpoints in the scream's direction get a bonus, so the rover heads toward the sound but still looks around. It also remembers where it has already looked from, so it does not keep returning to the same spot.
 
-**Getting there.** It plans a route around obstacles with **A\*** (a standard shortest-route method, like a map app), keeping 20 cm from the table edges, then follows the route.
+**Getting there.** It plans a route around obstacles with **A\*** (a standard shortest-route method, like a map app), keeping 20 cm from every table edge it has found so far, then follows the route. Until it has found an edge, the edge reflex (section 6) is what stops it there.
 
 ## 10. The rescue, step by step
 

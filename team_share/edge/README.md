@@ -60,7 +60,7 @@ The log prints `stream at http://<ip>/stream`. Open that address in a browser to
 ~/aegis_venv/bin/python team_share/edge/make_start_pad.py
 ```
 
-Print `edge/AEGIS_start_pad.pdf` on A4 at **100 % / actual size** and check that the marker measures 100 mm. Tape it flat on the table. Measure its centre from the table corner you will use as the origin: x along the long edge, y along the short edge, in metres. Those are your `--start` x and y. The arrow direction is the heading (0 = along x).
+Print `edge/AEGIS_start_pad.pdf` on A4 at **100 % / actual size** and check that the marker measures 100 mm. Tape it flat on the table at least 20 cm from every edge, with its arrow pointing straight along a table edge (by eye is enough). Nothing needs measuring: the rover learns where the table edges are as it goes.
 
 ## 5. Bring-up (rover on a stand first)
 
@@ -84,11 +84,12 @@ Then record real screams for the detector: press `r` and scream, about ten times
 ## 6. Run a mission
 
 ```bash
-~/aegis_venv/bin/python team_share/edge/aegis_edge.py --demo 2 --table 1.8 1.2 --start 0.20 0.20 0
+~/aegis_venv/bin/python team_share/edge/aegis_edge.py --demo 2
 ```
 
 - `--demo 1`: hidden token, no sound. `--demo 2`: a phone at the token plays a scream.
-- `--table`: the table's size in metres. `--start`: the pad centre and heading (step 4).
+- The table size is not needed. The first time a cliff sensor finds an edge, the rover's edge reflex stops it and backs it off, and the laptop remembers that edge and keeps the rover 20 cm inside it from then on. Each edge is found once. Expect a few edge stops in the first minute; they are normal. In the simulator this costs a little success compared with giving the exact size (17 of 32 missions against 20 of 32, no falls in either).
+- Optional, if you happen to know the size: `--table 1.8 1.2 --start 0.20 0.20 0` (size in metres; pad centre measured from one corner, x along the long edge; heading in degrees).
 
 A video window opens. Park the rover on the pad facing the arrow, then press **g** to start. **space** pauses (the rover stops) and **q** quits. Every run writes a log to `edge/logs/`.
 

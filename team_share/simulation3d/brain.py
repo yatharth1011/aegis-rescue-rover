@@ -4,7 +4,11 @@ Laptop "edge brain". Receives telemetry, JPEG frames and audio over the
 
   Mapping      occupancy grid (ToF cones) + "inspected" grid (camera ground
                footprint, occlusion-checked), in the table frame. The demo
-               starts the rover at a marked pose on a table of known size.
+               starts the rover at a marked pose on a table of known size,
+               or (table_known=False) on a table of unknown size: the map is a
+               SEARCH_SIZE square centred on the start, and each table edge is
+               learned the first time a cliff sensor finds it (the edges are
+               assumed parallel or square to the rover's start heading).
   Perception   YOLO victim-token detector on each frame; the bottom-centre of
                the box is projected onto the table plane -> token position.
                Screams: ScreamDetector on the 16 kHz stream; bearings from the
@@ -32,6 +36,8 @@ from world import CAM, TABLE, TOKEN
 RES = 0.02
 INFLATE = 0.14            # m: obstacle clearance for the rover centre (turning sweep ~0.16 m)
 EDGE_KEEP = 0.20          # m: keep the centre this far from table edges (0.17 let a rear wheel slip over)
+SEARCH_SIZE = 4.0         # m: map side when the table size is unknown (start at its centre)
+CLIFF_KEEP = 0.12         # m: keep-out radius around a cliff hit whose edge direction is unclear
 V_MAX = 0.16
 W_MAX = 1.6
 
@@ -41,20 +47,30 @@ def wrap(a):
 
 
 class Brain:
-    def __init__(self, start_pose, detector, scream_mode, rng):
+    def __init__(self, start_pose, detector, scream_mode, rng, table_known=True):
+        """start_pose is in the table frame; with table_known=False it is taken as
+        (SEARCH_SIZE / 2, SEARCH_SIZE / 2, heading) whatever x, y are given."""
+        self.table_known = table_known
+        if table_known:
+            self.lx, self.ly = TABLE["lx"], TABLE["ly"]
+            self.bounds = dict(x0=0.0, x1=self.lx, y0=0.0, y1=self.ly)
+        else:
+            self.lx = self.ly = SEARCH_SIZE
+            self.bounds = dict(x0=None, x1=None, y0=None, y1=None)     # learned from cliff hits
+            start_pose = (SEARCH_SIZE / 2, SEARCH_SIZE / 2, start_pose[2])
         self.x0, self.y0, self.th0 = start_pose
         self.det = detector
         self.scream_mode = scream_mode
         self.rng = rng
-        self.nx, self.ny = int(TABLE["lx"] / RES), int(TABLE["ly"] / RES)
+        self.nx, self.ny = int(self.lx / RES), int(self.ly / RES)
         self.occ = np.zeros((self.nx, self.ny), np.float32)        # log-odds
         self.seen_free = np.zeros((self.nx, self.ny), bool)
         self.inspected = np.zeros((self.nx, self.ny), bool)
         gx, gy = np.meshgrid((np.arange(self.nx) + 0.5) * RES, (np.arange(self.ny) + 0.5) * RES, indexing="ij")
         self.gx, self.gy = gx, gy
-        edge = np.minimum.reduce([gx, TABLE["lx"] - gx, gy, TABLE["ly"] - gy])
-        self.edge_bad = edge < EDGE_KEEP
-        self.on_table = edge > 0.03
+        self.cliff_bad = np.zeros((self.nx, self.ny), bool)
+        self.edge_fixes = self.edges_learned = 0
+        self._update_edges()
         self.pose = np.array(start_pose, float)
         self.telem = None
         self.state = "EXPLORE"
@@ -98,6 +114,18 @@ class Brain:
         self.corr += 0.6 * d
         self.marker_fixes += 1
 
+    def _update_edges(self):
+        """Keep-out band along each known table edge (and the map border); cells past a
+        known edge are off the table and are never inspected or planned through."""
+        gx, gy, b = self.gx, self.gy, self.bounds
+        edge = np.minimum.reduce([gx, self.lx - gx, gy, self.ly - gy])
+        for k, d in (("x0", gx - (b["x0"] or 0)), ("x1", (b["x1"] or 0) - gx),
+                     ("y0", gy - (b["y0"] or 0)), ("y1", (b["y1"] or 0) - gy)):
+            if b[k] is not None:
+                edge = np.minimum(edge, d)
+        self.edge_bad = (edge < EDGE_KEEP) | self.cliff_bad
+        self.on_table = edge > 0.03
+
     def cell(self, x, y):
         return int(np.clip(x / RES, 0, self.nx - 1)), int(np.clip(y / RES, 0, self.ny - 1))
 
@@ -107,7 +135,10 @@ class Brain:
     def on_telem(self, m):
         self.telem = m
         self.pose = self.to_table(m["est"])
-        self._edge_relocalise(m.get("cliff") or {})
+        if self.table_known:
+            self._edge_relocalise(m.get("cliff") or {})
+        else:
+            self._edge_learn(m.get("cliff") or {})
         x, y, th = self.pose
         cx, cy = self.cell(x, y)
         r = int(0.09 / RES)
@@ -148,8 +179,41 @@ class Brain:
             else:
                 self.corr[1] += TABLE["ly"] - sy
             self.pose = self.to_table(self.telem["est"])
-            self.edge_fixes = getattr(self, "edge_fixes", 0) + 1
+            self.edge_fixes += 1
             self.path = []                                    # replan from the corrected pose
+            break
+
+    def _edge_learn(self, cliff):
+        """Table size unknown. A front sensor firing means an edge ahead of the rover, a rear
+        one an edge behind it. The first hit on a side fixes that edge; later hits on a known
+        side correct odometry drift as in _edge_relocalise. A hit at a diagonal only gets a
+        small keep-out disk."""
+        x, y, th = self.pose
+        for k, on in cliff.items():
+            if not on or k not in self.CLIFF_POS:
+                continue
+            px, py = self.CLIFF_POS[k]
+            sx, sy = x + math.cos(th) * px - math.sin(th) * py, y + math.sin(th) * px + math.cos(th) * py
+            i, j = self.cell(sx, sy)
+            r = int(CLIFF_KEEP / RES)
+            self.cliff_bad[max(0, i - r):i + r + 1, max(0, j - r):j + r + 1] |= (
+                np.hypot(self.gx[max(0, i - r):i + r + 1, max(0, j - r):j + r + 1] - sx,
+                         self.gy[max(0, i - r):i + r + 1, max(0, j - r):j + r + 1] - sy) < CLIFF_KEEP)
+            out = th if px > 0 else th + math.pi
+            c, s = math.cos(out), math.sin(out)
+            if max(abs(c), abs(s)) >= 0.85:
+                side = ("x1" if c > 0 else "x0") if abs(c) > abs(s) else ("y1" if s > 0 else "y0")
+                coord = sx if side[0] == "x" else sy
+                known = self.bounds[side]
+                if known is None:
+                    self.bounds[side] = coord
+                    self.edges_learned += 1
+                elif abs(coord - known) < 0.30:
+                    self.corr[0 if side[0] == "x" else 1] += known - coord
+                    self.pose = self.to_table(self.telem["est"])
+                    self.edge_fixes += 1
+            self._update_edges()
+            self.path = []                                    # replan around the new edge
             break
 
     def blocked(self):
@@ -256,6 +320,10 @@ class Brain:
                     a, b = np.clip(ii + di, 0, self.nx - 1), np.clip(jj + dj, 0, self.ny - 1)
                     inflated[a, b] = True
         bad = inflated | self.edge_bad
+        if not self.table_known:
+            # learned edges can land a few cm inside the true ones (odometry drift): the
+            # start pad itself always stays plannable, or the rover could never get home
+            bad = bad & (np.hypot(self.gx - self.x0, self.gy - self.y0) > 0.10)
         if known_free_only:
             bad = bad | ~self.seen_free
         return bad

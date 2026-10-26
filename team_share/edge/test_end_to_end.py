@@ -16,7 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 
 
-def run(demo, seed, max_time):
+def run(demo, seed, max_time, table):
     fake = subprocess.Popen([PY, os.path.join(HERE, "fake_rover.py"), "--demo", str(demo), "--seed", str(seed),
                              "--max-time", str(max_time + 30)], stdout=subprocess.PIPE, text=True)
     start = None
@@ -26,7 +26,7 @@ def run(demo, seed, max_time):
             start = m.groups()
             break
     edge = subprocess.run([PY, os.path.join(HERE, "aegis_edge.py"), "--demo", str(demo), "--rover-ip", "127.0.0.1",
-                           "--cam-url", "http://127.0.0.1:8081/stream", "--start", *start, "--no-window",
+                           "--cam-url", "http://127.0.0.1:8081/stream", "--start", *start, "--table", *table, "--no-window",
                            "--max-time", str(max_time), "--cam-latency", "0.03"],
                           capture_output=True, text=True)
     fake.terminate()
@@ -46,10 +46,11 @@ def main():
     ap.add_argument("--demo", type=int, default=1)
     ap.add_argument("--seeds", type=int, nargs="+", default=[3009])
     ap.add_argument("--max-time", type=float, default=200)
+    ap.add_argument("--table", nargs="+", default=["unknown"], help="'unknown' or the true size: 1.8 1.2")
     a = ap.parse_args()
     results = []
     for s in a.seeds:
-        r = run(a.demo, s, a.max_time)
+        r = run(a.demo, s, a.max_time, a.table)
         results.append(r)
         print("demo %d seed %d: %s  (%s, %s s, token in bay %s, home %.2f m, fell %s, max command gap %s ms)" %
               (a.demo, s, "SUCCESS" if r["ok"] else "fail", r["state"], r["t"], r["token_in_bay"], r["home_err"],

@@ -1,6 +1,7 @@
 """
 Batch evaluation in parallel worker processes (YOLO on CPU per worker).
-    python eval_batch.py <out.csv> <demo> <link> <n> <first_seed> <workers>
+    python eval_batch.py <out.csv> <demo> <link> <n> <first_seed> <workers> [unknown]
+(unknown: the brain is not told the table size)
 """
 import csv
 import multiprocessing as mp
@@ -36,7 +37,7 @@ def _one(args):
     seed, demo, link = args
     from run_mission import run
     try:
-        r = run(seed, demo, link, _det, max_t=240.0)
+        r = run(seed, demo, link, _det, max_t=240.0, table_known=os.environ.get("AEGIS_TABLE") != "unknown")
     except Exception as e:
         r = dict(seed=seed, demo=demo, link=link, outcome="error:" + type(e).__name__ + ":" + str(e)[:80])
     return {k: (float(v) if hasattr(v, "item") else v) for k, v in r.items()}
@@ -44,6 +45,8 @@ def _one(args):
 
 if __name__ == "__main__":
     out, demo, link, n, first, workers = sys.argv[1], int(sys.argv[2]), sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6])
+    if len(sys.argv) > 7 and sys.argv[7] == "unknown":
+        os.environ["AEGIS_TABLE"] = "unknown"                     # inherited by the spawned workers
     jobs = [(first + i, demo, link) for i in range(n)]
     rows = []
     with mp.get_context("spawn").Pool(workers, initializer=_init) as pool:

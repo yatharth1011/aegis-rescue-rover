@@ -35,14 +35,17 @@ class YoloDetector:
         return [(*b, float(c)) for b, c in zip(xyxy, conf)]
 
 
-def run(seed, demo, link_profile="typical", detector=None, max_t=240.0, record=None):
+def run(seed, demo, link_profile="typical", detector=None, max_t=240.0, record=None, table_known=True):
+    """table_known=False: the brain is not told the table size (its frame is the world frame
+    shifted so the start sits at the centre of its search map)."""
     rng = np.random.default_rng(seed + 7919 * demo)
     world = World(seed, token_hidden=(demo == 1), n_decoys=2)
     link = Link(link_profile, rng)
     robot = Robot(world, link, rng)
     robot.scream_clip = synth_scream(0.6, AFS, rng)
     room = Room(rng)
-    brain = Brain(world.info["start"], detector, scream_mode=(demo == 2), rng=rng)
+    brain = Brain(world.info["start"], detector, scream_mode=(demo == 2), rng=rng, table_known=table_known)
+    off = np.array([brain.x0, brain.y0]) - world.info["start"][:2]          # world -> brain frame
     token_xy = world.info["token"]
     sched = (lambda tt: (tt % 2.0) < 0.6) if demo == 2 else (lambda tt: np.zeros_like(tt, bool))
 
@@ -71,7 +74,8 @@ def run(seed, demo, link_profile="typical", detector=None, max_t=240.0, record=N
             d = math.hypot(sx0 - cx, sy0 - cy)
             bearing = (math.atan2(sy0 - cy, sx0 - cx) - th + math.pi) % (2 * math.pi) - math.pi
             if 0.15 < d < 0.9 and abs(bearing) < 0.42 and rng.random() < 0.8:
-                meas = (x + 0.02 * rng.standard_normal(), y + 0.02 * rng.standard_normal(), th + 0.035 * rng.standard_normal())
+                meas = (x + off[0] + 0.02 * rng.standard_normal(), y + off[1] + 0.02 * rng.standard_normal(),
+                        th + 0.035 * rng.standard_normal())
                 link.up.send(t, dict(type="marker", t=t, est=robot.est.copy(), pose=meas), 48)
         if robot.pending_listen is not None:
             robot.listen(t, room, token_xy if demo == 2 else None, sched, dur=robot.pending_listen.get("dur", 0.8))
@@ -106,7 +110,7 @@ def run(seed, demo, link_profile="typical", detector=None, max_t=240.0, record=N
         path_len += float(np.hypot(*(xy - prev_xy)))
         prev_xy = xy
         if record is not None and k % 25 == 0:
-            record.append(dict(t=t, pose=world.pose().copy(), est=brain.pose.copy(), state=brain.state,
+            record.append(dict(t=t, pose=world.pose().copy(), est=brain.pose.copy() - [*off, 0], state=brain.state,
                                token=world.token_pos()[:2].copy(), bearing=brain.bearing,
                                path=list(brain.path), inspected=brain.inspected.copy() if k % 100 == 0 else None,
                                occ=(brain.occ > 1.0).copy() if k % 100 == 0 else None,
@@ -127,7 +131,8 @@ def run(seed, demo, link_profile="typical", detector=None, max_t=240.0, record=N
                     scream_heard=brain.log["scream_heard"], detections=brain.log["detections"],
                     approach_attempts=brain.log["approach_attempts"], marker_fixes=brain.marker_fixes,
                     inspected_pct=100.0 * brain.inspected[brain.on_table].mean(),
-                    odom_err=float(np.hypot(*(brain.pose[:2] - world.pose()[:2]))),
+                    odom_err=float(np.hypot(*(brain.pose[:2] - off - world.pose()[:2]))),
+                    edges_learned=brain.edges_learned, edge_fixes=brain.edge_fixes,
                     frame_kb=float(np.mean(frame_bytes)) / 1024 if frame_bytes else 0.0,
                     **{"link_" + k2: v for k2, v in link.stats().items()}, **robot.events))
     world.close()

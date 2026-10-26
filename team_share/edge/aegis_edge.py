@@ -2,10 +2,19 @@
 A.E.G.I.S. edge brain on the real rover: the same brain.py the 3D simulation was evaluated with,
 fed by the rover's Wi-Fi link instead of the simulator.
 
+    ~/aegis_venv/bin/python team_share/edge/aegis_edge.py --demo 2
+
+No measuring needed (the default, --table unknown): put the start pad anywhere on the table with
+the rover on it pointing straight along a table edge or straight across it, by eye. The rover
+finds each edge with its cliff sensors the first time it reaches it and plans around it after.
+
+If you do know the table size, giving it makes the search a little faster:
+
     ~/aegis_venv/bin/python team_share/edge/aegis_edge.py --demo 2 --table 1.8 1.2 --start 0.20 0.20 0
 
 Table frame: origin at the table corner nearest the start pad, x along the long edge, y along the
-short edge, metres. --start is the rover's pose on the start pad (x, y, heading in degrees).
+short edge, metres. --start is the rover's pose on the start pad (x, y, heading in degrees); with
+an unknown table only the heading is used (0 = pointing along an edge).
 
 Window keys:  g = go   space = pause / resume   o = open/close door (paused only)   q = quit
 The rover only moves after "g". Closing the program or losing Wi-Fi stops it (300 ms watchdog).
@@ -118,7 +127,8 @@ class StartPad:
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--demo", type=int, choices=(1, 2), default=2, help="1 = hidden token, 2 = scream homing")
-    ap.add_argument("--table", type=float, nargs=2, default=(1.8, 1.2), metavar=("LX", "LY"))
+    ap.add_argument("--table", nargs="+", default=["unknown"], metavar="LX LY",
+                    help="table size in metres, or 'unknown' (default) to learn the edges")
     ap.add_argument("--start", type=float, nargs=3, default=(0.20, 0.20, 0.0), metavar=("X", "Y", "DEG"))
     ap.add_argument("--rover-ip", help="skip discovery")
     ap.add_argument("--cam-url", help="skip discovery, e.g. http://192.168.4.3/stream")
@@ -132,7 +142,11 @@ def main():
     ap.add_argument("--no-window", action="store_true", help="start at once, no video window")
     a = ap.parse_args()
 
-    world.TABLE.update(lx=a.table[0], ly=a.table[1])          # the brain reads these at construction
+    table_known = a.table != ["unknown"]
+    if table_known:
+        if len(a.table) != 2:
+            sys.exit("--table takes two numbers (metres) or 'unknown'")
+        world.TABLE.update(lx=float(a.table[0]), ly=float(a.table[1]))   # the brain reads these at construction
     from brain import Brain
     start = np.array([a.start[0], a.start[1], math.radians(a.start[2])])
 
@@ -148,7 +162,10 @@ def main():
     cam = CameraStream(url)
     print("camera", url)
     print("loading detector", os.path.basename(a.model))
-    brain = Brain(start, YoloDetector(a.model), scream_mode=(a.demo == 2), rng=np.random.default_rng())
+    brain = Brain(start, YoloDetector(a.model), scream_mode=(a.demo == 2), rng=np.random.default_rng(),
+                  table_known=table_known)
+    start = np.array([brain.x0, brain.y0, brain.th0])          # the frame the brain actually uses
+    print("table %s" % ("%.2f x %.2f m" % (brain.lx, brain.ly) if table_known else "unknown: learning the edges"))
     pad = StartPad(start, a.calib)
     hist = PoseHistory()
     keep = KeepAlive(link)
