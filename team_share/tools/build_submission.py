@@ -235,8 +235,18 @@ def build_deck(sim):
     return path
 
 
-TEAM = [("Yatharth Shrivastava", ""), ("Prabhnoor Singh", ""), ("Shreyansh", ""),
-        ("Souvik Das", ""), ("Utkarsh Kumar Gautam", ""), ("Shubham Maurya", "")]
+def load_team():
+    """Names and roll numbers live in tools/team.json, which is kept out of the public repo (.gitignore).
+    Without it the files build with names only."""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "team.json")
+    if os.path.exists(p):
+        with open(p) as f:
+            return [tuple(t) for t in json.load(f)]
+    return [(n, "") for n in ("Yatharth Shrivastava", "Prabhnoor Singh", "Shreyansh", "Souvik Das", "Utkarsh Kumar Gautam",
+                              "Shubham Maurya")]
+
+
+TEAM = load_team()
 TITLE = "A.E.G.I.S.: Autonomous Search-and-Rescue Rover"
 
 

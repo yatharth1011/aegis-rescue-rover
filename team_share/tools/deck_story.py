@@ -332,9 +332,8 @@ def add_story(prs, paths, sim):
     s = prs.slides.add_slide(blank)
     bg(s, NAVY)
     title(s, "The team", "Six AI & Data Engineering students, one rover")
-    team = [("Yatharth Shrivastava", "", ""), ("Prabhnoor Singh", "", ""),
-            ("Shreyansh", "", ""), ("Souvik Das", "", ""),
-            ("Utkarsh Kumar Gautam", "", ""), ("Shubham Maurya", "", "")]
+    from build_submission import load_team                      # roll numbers come from the local team.json
+    team = [(name, roll, "") for name, roll in load_team()]
     cw, ch = E(3.85), E(1.15)
     for i, (name, roll, role) in enumerate(team):
         x = M + (i % 3) * (cw + E(0.2))

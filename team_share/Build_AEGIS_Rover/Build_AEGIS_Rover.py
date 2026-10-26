@@ -1,4 +1,4 @@
-# Author: Yatharth Shrivastava () and team
+# Author: Yatharth Shrivastava and team
 # Project: A.E.G.I.S. rescue rover, Mk2 assembly
 # Course: TL101 Tinkering Lab | IIT Ropar
 #

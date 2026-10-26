@@ -19,3 +19,10 @@ team_share/edge/logs/
 team_share/edge/dataset/
 team_share/edge/camera_calib.npz
 MUJOCO_LOG.TXT
+# kept local, out of the public repo: roll numbers, submitted files, course materials
+team_share/tools/team.json
+to_submit/
+course_templates/
+FINAL/1_submission/
+team_share/AEGIS_Proposal_Deck.pdf
+FINAL/4_guides/AEGIS_Proposal_Deck.pdf

@@ -8,9 +8,9 @@ The rover **hears** a distress call, **searches** a table-top arena, **recognise
 |---|---|
 | **[`AEGIS_How_It_Works.pdf`](team_share/AEGIS_How_It_Works.pdf)** | **How the whole system works, in plain language** |
 | **[`FINAL/`](FINAL)** | **Start here:** submission files, laser-cut DXFs, 3D-print plates, guides and the CAD model, in one place |
-| [`to_submit/`](to_submit) | Proposal deck (`.pptx`), itemised BOM (`.xlsx`), faculty approval form (`.docx`) |
+| `to_submit/` | Proposal deck, item list and approval form as submitted (kept on the team's machines, not in this repo) |
 | [`team_share/`](team_share) | Everything the team works from. **[`AEGIS_Fabrication_Guide.pdf`](team_share/AEGIS_Fabrication_Guide.pdf)**: what to cut or print from which material. **Read [`team_share/README.md`](team_share/README.md)** for the full log, results and to-do list |
-| [`course_templates/`](course_templates) | Blank templates as issued by the course |
+
 
 **Status:** proposal **approved**; now building.
 - Mk2 is designed in Autodesk Fusion (46 parts, zero clashes, with a wiring harness and engraved placement marks).
