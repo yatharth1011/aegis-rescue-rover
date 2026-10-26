@@ -19,7 +19,7 @@ from matplotlib import patches
 from matplotlib.backends.backend_pdf import PdfPages
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "AEGIS_Wiring_Guide.pdf")
+OUT = os.path.join(HERE, "..", "deck_assets", "guides", "wiring_reference.pdf")   # appendix of AEGIS_Wiring_Guide.pdf
 
 C = {"12V": "#d01c1c", "GND": "#111111", "5V": "#e8590c", "5V_servo": "#f59f00", "3V3": "#c2255c", "SDA": "#f2c500",
      "SCL": "#2b9348", "I2S": "#1c64d8", "UART": "#9aa0a6", "PWM": "#7b2cbf", "ENC": "#8d5524", "XSHUT": "#5c7cfa",
@@ -35,7 +35,7 @@ USE = {  # GPIO -> (function, colour key)
     "16": ("FR motor IN1", "PWM"), "17": ("FR motor IN2", "PWM"), "18": ("RR motor IN1", "PWM"), "21": ("RR motor IN2", "PWM"),
     "46": ("STBY both TB6612", "PWM"), "38": ("FL enc A", "ENC"), "39": ("FL enc B", "ENC"), "40": ("RL enc A", "ENC"),
     "41": ("RL enc B", "ENC"), "42": ("FR enc A", "ENC"), "47": ("FR enc B", "ENC"), "48": ("RR enc A", "ENC"), "7": ("RR enc B", "ENC"),
-    "3": ("Door servo signal", "5V_servo"), "2": ("ESP32-CAM TX -> RX", "UART"), "1": ("Battery sense (divider)", "VBAT"),
+    "3": ("Door servo signal", "5V_servo"), "1": ("Battery sense (divider)", "VBAT"),
     "0": ("BOOT = start/abort", "UART"), "5V": ("5 V from logic buck", "5V"), "GND": ("Ground", "GND"), "3V3": ("3V3 to sensors", "3V3"),
 }
 
@@ -84,7 +84,6 @@ WIRES = [  # from, to, signal, colour key, gauge
     ("TB6612 AO1/AO2/BO1/BO2", "motor red / white", "motor power", "MOTOR", "22 AWG"),
     ("Encoders yellow / green", "GPIO 38/39, 40/41, 42/47, 48/7", "quadrature", "ENC", "26 AWG"),
     ("ESP32 GPIO 3", "MG946R orange", "50 Hz servo pulse", "5V_servo", "26 AWG"),
-    ("ESP32-CAM U0T", "ESP32 GPIO 2", "UART 115200", "UART", "26 AWG"),
     ("Battery + via 100k / 20k", "ESP32 GPIO 1 (divider tapped after the switch)", "battery voltage", "VBAT", "26 AWG"),
     ("IR modules DO", "PCF8574 P0-P5", "5 cliff + bay capture", "IR", "26 AWG"),
 ]

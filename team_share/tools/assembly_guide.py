@@ -426,11 +426,11 @@ def build_steps(P):
                "Tape the bracket to the front lip of the deck, centred, sensor looking straight ahead."]))
     S.append(dict(
         title="Wire the lower deck", new=[], view=(-90, 70), offs={}, wide=True,
-        need=[(None, "Wiring guide, pages 2-3", 1, "PDF"), (None, "Silicone wire, solder, heat-shrink", 1, "#24-#35")],
-        steps=["Follow AEGIS_Wiring_Guide.pdf, page 3, one row at a time; tick each row off as you go.",
-               "Power first: battery lead - fuse board - switch lead (leave it loose for now) - both regulators and both drivers.",
-               "Then motor leads to the drivers, encoder leads, edge-sensor leads to the PCF8574.",
-               "Leave the wires for the upper deck 15 cm long and bundle them at the harness slot."],
+        need=[(None, "Wiring guide, steps W4-W9", 1, "PDF"), (None, "Silicone wire, solder, heat-shrink", 1, "#24-#35")],
+        steps=["Open AEGIS_Wiring_Guide.pdf at W4 and do W4 to W9 in order, one table row at a time.",
+               "W4 power, W5 set both regulators to 5.0 V, W6 motors, W7 servo power, W8 edge and bay sensors.",
+               "W9: label every lead that goes to the upper deck and leave it 15 cm long at the harness slot.",
+               "Do each step's green CHECK before the next one."],
         warn="Battery unplugged the whole time. Heat-shrink every power joint before you go on."))
     pil = G("M3_Pillar")
     S.append(dict(
@@ -478,10 +478,11 @@ def build_steps(P):
                "Point both straight out to the sides."]))
     S.append(dict(
         title="Wire the upper deck", new=[], view=(-90, 72), offs={}, wide=True,
-        need=[(None, "Wiring guide, pages 1-3", 1, "PDF")],
-        steps=["Connect the upper deck with AEGIS_Wiring_Guide.pdf: I2C (gyro, side and front sensors, PCF8574),",
-               "the two microphones, the motor-driver and encoder pins, the servo signal and the camera UART.",
-               "Keep the microphone (I2S) wires under 15 cm. Bundle the rest with cable ties, clear of the wheels."]))
+        need=[(None, "Wiring guide, steps W10-W15", 1, "PDF")],
+        steps=["Take the ESP32-S3 out of its sockets. Then do W10 to W14 in the wiring guide, in order:",
+               "W10 power, W11 I2C sensors, W12 microphones, W13 motor control, W14 encoders and servo signal.",
+               "W15: first power-up checks, then plug the ESP32-S3 back in.",
+               "Bundle the wires with cable ties, clear of the wheels and the camera's view."]))
     mast = G("Camera_Mast")
     S.append(dict(
         title="Camera mast", new=mast + G("Screw_Mast"), view=(-45, 18),
@@ -705,7 +706,7 @@ def main():
              '<h3>BEFORE YOU START</h3>'
              '<p><b>Tools:</b> Phillips screwdriver, side cutters, wire strippers, soldering iron, multimeter, hairdryer.</p>'
              '<p><b>Made first</b> (Fabrication guide): both laser-cut decks, all printed parts, the soldered ESP32-S3 '
-             'carrier board, headers soldered on every module.</p>'
+             'carrier board, headers soldered on every module (Wiring guide W1-W3).</p>'
              '<p><b>Check</b> every board against its engraved outline before sticking it down.</p>'
              '<p><b>Battery</b> stays unplugged until step 27.</p>'
              '<h3 style="margin-top:4mm">HOW TO READ A STEP</h3>'
@@ -714,7 +715,7 @@ def main():
              '<span class="sw" style="background:#b3b8c2"></span>screws, nuts</p>'
              '<p>Orange arrows show where a part moves. RESULT shows the same view once the step is done. Numbered balloons match the YOU NEED list. '
              'An orange circle is a close-up. "x 4" next to the title: do it four times.</p>'
-             '<p><b>Wiring</b> with AEGIS_Wiring_Guide.pdf at steps 16 and 24.</p></div></div>'
+             '<p><b>Wiring</b> with AEGIS_Wiring_Guide.pdf at steps 16 (W4-W9) and 24 (W10-W15).</p></div></div>'
              % (len(steps), png_uri(hero)))
     doc = ("<!doctype html><html><head><meta charset='utf-8'><style>%s</style></head><body>%s%s%s</body></html>" %
            (CSS % dict(navy=NAVY, orange=ORANGE), cover, HARDWARE, "".join(pages)))

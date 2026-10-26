@@ -53,7 +53,7 @@ team_share/
 ├── README.md                    This file
 ├── AEGIS_Proposal_Deck.pdf      The proposal deck as a PDF (the .pptx is in to_submit/)
 ├── AEGIS_Assembly_Guide.pdf     Step-by-step exploded-view assembly (rendered from the Fusion model)
-├── AEGIS_Wiring_Guide.pdf       Pin map, every board's face with wire positions, wire list
+├── AEGIS_Wiring_Guide.pdf       Step-by-step wiring (W1-W15) with pin-to-pin drawings and checks; pin map appendix
 ├── AEGIS_Fabrication_Guide.pdf  What is cut or printed, from which material (source: FABRICATION_GUIDE.md)
 ├── AEGIS_Deployment_Guide.pdf   Flashing, network, bring-up, first mission (source: edge/README.md)
 ├── edge/                        Laptop edge brain for the real rover, bring-up tool, start pad, deployment guide
